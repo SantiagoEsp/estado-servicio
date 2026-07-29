@@ -27,6 +27,21 @@
       "description": "Avisos operativos enviados por la plataforma.",
       "status": "operational"
     }
-  ]
+  ],
+  "history": {
+    "startedAt": "2026-07-29",
+    "days": [
+      {
+        "date": "2026-07-29",
+        "overall": "operational",
+        "components": {
+          "public_site": "operational",
+          "merchant_panel": "operational",
+          "catalogs_orders": "operational",
+          "notifications": "operational"
+        }
+      }
+    ]
+  }
 }
 

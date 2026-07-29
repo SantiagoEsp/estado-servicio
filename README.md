@@ -16,6 +16,10 @@ abre o resuelve automáticamente el incidente público. Mientras el estado no
 cambie, publica una confirmación como máximo una vez por hora para evitar
 commits innecesarios.
 
+Cada componente muestra un gráfico compacto de los últimos 90 días. El historial
+empieza con la primera medición real: los días anteriores se ven como no medidos
+y no se completan con disponibilidad ficticia.
+
 ## Desarrollo
 
 No requiere dependencias externas.
@@ -39,4 +43,3 @@ internos.
 
 `Publicar página de estado` valida y despliega el sitio mediante GitHub Pages.
 El dominio temporal previsto es `estado.sanezeit.com`.
-
