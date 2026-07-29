@@ -8,7 +8,7 @@ const STATUS_LABELS = {
 };
 
 const OVERALL_TITLES = {
-  operational: "Todo funciona con normalidad.",
+  operational: "Todo operativo.",
   degraded: "El servicio funciona con demoras.",
   partial_outage: "Hay una interrupción parcial.",
   major_outage: "El servicio está interrumpido.",
@@ -198,7 +198,7 @@ async function render() {
     document.body.dataset.overall = overall;
     title.textContent = OVERALL_TITLES[overall];
     message.textContent = statusData.message;
-    lastUpdated.textContent = `Última verificación: ${formatDate(statusData.checkedAt)}`;
+    lastUpdated.textContent = `Actualizado: ${formatDate(statusData.checkedAt)}`;
 
     componentsContainer.replaceChildren();
     const line = document.createElement("div");

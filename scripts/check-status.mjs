@@ -30,7 +30,7 @@ export const TARGETS = [
 ];
 
 const STATUS_MESSAGES = {
-  operational: "Todos los servicios controlados funcionan con normalidad.",
+  operational: "No detectamos problemas en los servicios controlados.",
   partial_outage: "Detectamos problemas en una parte del servicio.",
   major_outage: "La plataforma no está respondiendo correctamente.",
 };

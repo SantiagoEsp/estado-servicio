@@ -69,7 +69,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 90px;
+  min-height: 56px;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -122,14 +122,14 @@ footer {
 .status-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 48px;
-  align-items: end;
-  min-height: 300px;
-  padding-block: 60px 56px;
+  gap: 30px;
+  align-items: center;
+  min-height: 128px;
+  padding-block: 18px;
 }
 
 .eyebrow {
-  margin: 0 0 16px;
+  margin: 0 0 8px;
   color: var(--slate);
   font-family: var(--data);
   font-size: 0.72rem;
@@ -146,13 +146,13 @@ p {
 }
 
 h1 {
-  max-width: 740px;
-  margin-bottom: 22px;
+  max-width: none;
+  margin-bottom: 10px;
   font-family: var(--display);
-  font-size: clamp(2.85rem, 7vw, 5.8rem);
+  font-size: clamp(2.4rem, 5vw, 4rem);
   font-weight: 650;
   letter-spacing: -0.065em;
-  line-height: 0.94;
+  line-height: 0.98;
   text-wrap: balance;
 }
 
@@ -160,8 +160,8 @@ h1 {
   max-width: 640px;
   margin-bottom: 0;
   color: var(--slate);
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
-  line-height: 1.6;
+  font-size: 0.96rem;
+  line-height: 1.45;
 }
 
 .live-stamp {
@@ -220,22 +220,22 @@ body[data-overall="major_outage"] .live-dot {
 
 .services-section,
 .history-section {
-  padding-block: 44px 56px;
+  padding-block: 20px 22px;
   border-top: 1px solid var(--rule);
 }
 
 .section-heading {
   display: grid;
   grid-template-columns: 1fr minmax(240px, 370px);
-  gap: 40px;
+  gap: 24px;
   align-items: end;
-  margin-bottom: 35px;
+  margin-bottom: 12px;
 }
 
 .section-heading h2 {
   margin-bottom: 0;
   font-family: var(--display);
-  font-size: clamp(1.8rem, 4vw, 2.65rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 650;
   letter-spacing: -0.04em;
 }
@@ -243,27 +243,24 @@ body[data-overall="major_outage"] .live-dot {
 .section-heading > p {
   margin-bottom: 3px;
   color: var(--slate);
-  font-size: 0.96rem;
-  line-height: 1.55;
+  font-size: 0.84rem;
+  line-height: 1.4;
 }
 
 .signal-board {
   position: relative;
-  overflow: hidden;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper);
-  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .signal-line {
-  position: absolute;
-  z-index: 0;
-  top: 37px;
-  bottom: 37px;
-  left: 37px;
-  width: 1px;
-  background: var(--rule);
+  display: none;
 }
 
 .service-row {
@@ -271,10 +268,14 @@ body[data-overall="major_outage"] .live-dot {
   z-index: 1;
   display: grid;
   grid-template-columns: 26px minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 10px 13px;
   align-items: center;
-  min-height: 128px;
-  padding: 20px 30px 18px 25px;
+  min-height: 108px;
+  padding: 12px 15px 10px 13px;
+  border: 1px solid var(--rule);
+  border-radius: 15px;
+  background: var(--paper);
+  box-shadow: 0 10px 32px rgb(16 33 43 / 5%);
 }
 
 .service-row + .service-row {
@@ -282,9 +283,9 @@ body[data-overall="major_outage"] .live-dot {
 }
 
 .service-node {
-  width: 26px;
-  height: 26px;
-  border: 8px solid var(--paper);
+  width: 22px;
+  height: 22px;
+  border: 7px solid var(--paper);
   border-radius: 50%;
   background: var(--unknown);
   box-shadow: 0 0 0 1px var(--unknown);
@@ -307,8 +308,8 @@ body[data-overall="major_outage"] .live-dot {
 }
 
 .service-row h3 {
-  margin-bottom: 5px;
-  font-size: 1.03rem;
+  margin-bottom: 2px;
+  font-size: 0.94rem;
   font-weight: 680;
   letter-spacing: -0.015em;
 }
@@ -316,18 +317,18 @@ body[data-overall="major_outage"] .live-dot {
 .service-row p {
   margin-bottom: 0;
   color: var(--slate);
-  font-size: 0.89rem;
-  line-height: 1.45;
+  font-size: 0.76rem;
+  line-height: 1.35;
 }
 
 .status-label {
-  min-width: 136px;
-  padding: 8px 11px;
+  min-width: 98px;
+  padding: 6px 9px;
   border-radius: 999px;
   background: #edf1f2;
   color: var(--unknown);
   font-family: var(--data);
-  font-size: 0.68rem;
+  font-size: 0.59rem;
   font-weight: 650;
   text-align: center;
   text-transform: uppercase;
@@ -352,7 +353,7 @@ body[data-overall="major_outage"] .live-dot {
 .uptime-chart {
   display: grid;
   grid-column: 2 / -1;
-  gap: 7px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -360,8 +361,9 @@ body[data-overall="major_outage"] .live-dot {
   display: grid;
   grid-template-columns: repeat(90, minmax(1px, 1fr));
   gap: 2px;
-  height: 25px;
-  padding-block: 3px;
+  gap: 1px;
+  height: 15px;
+  padding-block: 2px;
 }
 
 .uptime-day {
@@ -390,7 +392,7 @@ body[data-overall="major_outage"] .live-dot {
   align-items: center;
   color: var(--slate);
   font-family: var(--data);
-  font-size: 0.6rem;
+  font-size: 0.52rem;
 }
 
 .uptime-meta strong {
@@ -407,13 +409,29 @@ body[data-overall="major_outage"] .live-dot {
   gap: 12px;
 }
 
+.history-section {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.5fr);
+  gap: 28px;
+  align-items: center;
+}
+
+.history-section .section-heading {
+  display: block;
+  margin-bottom: 0;
+}
+
+.history-section .section-heading > p {
+  margin-top: 7px;
+}
+
 .empty-state,
 .incident {
   display: grid;
   grid-template-columns: 36px 1fr auto;
   gap: 18px;
   align-items: start;
-  padding: 24px 26px;
+  padding: 12px 16px;
   border: 1px solid var(--rule);
   border-radius: 16px;
   background: rgb(255 255 255 / 65%);
@@ -467,7 +485,7 @@ footer {
   display: flex;
   justify-content: space-between;
   gap: 30px;
-  padding-block: 32px 45px;
+  padding-block: 12px 16px;
   border-top: 1px solid var(--rule);
   color: var(--slate);
   font-size: 0.78rem;
@@ -515,11 +533,11 @@ footer p {
     grid-template-columns: 1fr;
     gap: 35px;
     min-height: auto;
-    padding-block: 56px 44px;
+    padding-block: 36px 30px;
   }
 
   h1 {
-    font-size: clamp(2.8rem, 15vw, 4.4rem);
+    font-size: clamp(2.55rem, 14vw, 4rem);
   }
 
   .section-heading {
@@ -527,14 +545,18 @@ footer p {
     gap: 14px;
   }
 
+  .signal-board {
+    grid-template-columns: 1fr;
+  }
+
   .service-row {
     grid-template-columns: 26px 1fr;
     gap: 14px;
-    padding: 19px 18px 17px 16px;
+    padding: 16px 15px 14px 13px;
   }
 
   .signal-line {
-    left: 28px;
+    display: none;
   }
 
   .status-label {
@@ -555,6 +577,12 @@ footer p {
 
   .uptime-meta {
     font-size: 0.54rem;
+  }
+
+  .history-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .empty-state,
