@@ -5,6 +5,14 @@ const STATUS_PATH = new URL("../data/status.json", import.meta.url);
 const INCIDENTS_PATH = new URL("../data/incidents.json", import.meta.url);
 const MAX_HISTORY_DAYS = 90;
 const REFRESH_AFTER_MINUTES = 55;
+const STATUS_SEVERITY = {
+  unknown: -1,
+  operational: 0,
+  maintenance: 1,
+  degraded: 2,
+  partial_outage: 3,
+  major_outage: 4,
+};
 
 export const TARGETS = [
   {
@@ -95,7 +103,7 @@ function componentStatus(componentId, results, overall) {
 export function updateStatusDocument(currentStatus, results, checkedAt) {
   const overall = overallFromResults(results);
 
-  return {
+  const nextStatus = {
     ...currentStatus,
     overall,
     checkedAt,
@@ -104,6 +112,53 @@ export function updateStatusDocument(currentStatus, results, checkedAt) {
       ...component,
       status: componentStatus(component.id, results, overall),
     })),
+  };
+
+  return {
+    ...nextStatus,
+    history: updateDailyHistory(currentStatus.history, nextStatus, checkedAt),
+  };
+}
+
+function worseStatus(first, second) {
+  return STATUS_SEVERITY[first] >= STATUS_SEVERITY[second] ? first : second;
+}
+
+export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
+  const date = checkedAt.slice(0, 10);
+  const history = currentHistory ?? { startedAt: date, days: [] };
+  const components = Object.fromEntries(
+    nextStatus.components.map((component) => [component.id, component.status]),
+  );
+  const nextDay = {
+    date,
+    overall: nextStatus.overall,
+    components,
+  };
+  const existingIndex = history.days.findIndex((day) => day.date === date);
+  const days = [...history.days];
+
+  if (existingIndex === -1) {
+    days.push(nextDay);
+  } else {
+    const existing = days[existingIndex];
+    days[existingIndex] = {
+      date,
+      overall: worseStatus(existing.overall, nextDay.overall),
+      components: Object.fromEntries(
+        Object.entries(nextDay.components).map(([id, status]) => [
+          id,
+          worseStatus(existing.components?.[id] ?? "unknown", status),
+        ]),
+      ),
+    };
+  }
+
+  return {
+    startedAt: history.startedAt ?? date,
+    days: days
+      .filter((day) => Date.parse(`${day.date}T00:00:00Z`) >= Date.parse(checkedAt) - 89 * 86400000)
+      .sort((first, second) => first.date.localeCompare(second.date)),
   };
 }
 

@@ -124,8 +124,8 @@ footer {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 48px;
   align-items: end;
-  min-height: 355px;
-  padding-block: 76px 70px;
+  min-height: 300px;
+  padding-block: 60px 56px;
 }
 
 .eyebrow {
@@ -220,7 +220,7 @@ body[data-overall="major_outage"] .live-dot {
 
 .services-section,
 .history-section {
-  padding-block: 58px 72px;
+  padding-block: 44px 56px;
   border-top: 1px solid var(--rule);
 }
 
@@ -273,8 +273,8 @@ body[data-overall="major_outage"] .live-dot {
   grid-template-columns: 26px minmax(0, 1fr) auto;
   gap: 18px;
   align-items: center;
-  min-height: 105px;
-  padding: 24px 30px 24px 25px;
+  min-height: 128px;
+  padding: 20px 30px 18px 25px;
 }
 
 .service-row + .service-row {
@@ -347,6 +347,59 @@ body[data-overall="major_outage"] .live-dot {
 .service-row[data-status="major_outage"] .status-label {
   background: var(--danger-soft);
   color: #8e2d26;
+}
+
+.uptime-chart {
+  display: grid;
+  grid-column: 2 / -1;
+  gap: 7px;
+  min-width: 0;
+}
+
+.uptime-bars {
+  display: grid;
+  grid-template-columns: repeat(90, minmax(1px, 1fr));
+  gap: 2px;
+  height: 25px;
+  padding-block: 3px;
+}
+
+.uptime-day {
+  min-width: 1px;
+  border-radius: 2px;
+  background: #e3e8ea;
+}
+
+.uptime-day[data-status="operational"] {
+  background: var(--signal);
+}
+
+.uptime-day[data-status="degraded"],
+.uptime-day[data-status="partial_outage"],
+.uptime-day[data-status="maintenance"] {
+  background: var(--warning);
+}
+
+.uptime-day[data-status="major_outage"] {
+  background: var(--danger);
+}
+
+.uptime-meta {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  color: var(--slate);
+  font-family: var(--data);
+  font-size: 0.6rem;
+}
+
+.uptime-meta strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.uptime-meta span:last-child {
+  text-align: right;
 }
 
 .incident-list {
@@ -462,7 +515,7 @@ footer p {
     grid-template-columns: 1fr;
     gap: 35px;
     min-height: auto;
-    padding-block: 70px 52px;
+    padding-block: 56px 44px;
   }
 
   h1 {
@@ -477,7 +530,7 @@ footer p {
   .service-row {
     grid-template-columns: 26px 1fr;
     gap: 14px;
-    padding: 22px 20px 22px 16px;
+    padding: 19px 18px 17px 16px;
   }
 
   .signal-line {
@@ -488,6 +541,20 @@ footer p {
     grid-column: 2;
     justify-self: start;
     min-width: 0;
+  }
+
+  .uptime-chart {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .uptime-bars {
+    gap: 1px;
+    height: 21px;
+  }
+
+  .uptime-meta {
+    font-size: 0.54rem;
   }
 
   .empty-state,

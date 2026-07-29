@@ -5,6 +5,7 @@ import {
   checkTarget,
   overallFromResults,
   shouldPersist,
+  updateDailyHistory,
   updateIncidentsDocument,
   updateStatusDocument,
 } from "../scripts/check-status.mjs";
@@ -103,6 +104,50 @@ test("persiste al cambiar el estado o después de 55 minutos", () => {
     shouldPersist(baseStatus, baseStatus, "2026-07-29T21:00:00.000Z"),
     true,
   );
+});
+
+test("registra disponibilidad diaria sin inventar días anteriores", () => {
+  const history = updateDailyHistory(
+    undefined,
+    {
+      overall: "operational",
+      components: baseStatus.components,
+    },
+    "2026-07-29T23:00:00.000Z",
+  );
+
+  assert.equal(history.startedAt, "2026-07-29");
+  assert.equal(history.days.length, 1);
+  assert.equal(history.days[0].components.public_site, "operational");
+});
+
+test("conserva el peor estado observado durante el día", () => {
+  const history = updateDailyHistory(
+    {
+      startedAt: "2026-07-29",
+      days: [
+        {
+          date: "2026-07-29",
+          overall: "major_outage",
+          components: {
+            public_site: "major_outage",
+            merchant_panel: "major_outage",
+            catalogs_orders: "major_outage",
+            notifications: "major_outage",
+          },
+        },
+      ],
+    },
+    {
+      overall: "operational",
+      components: baseStatus.components,
+    },
+    "2026-07-29T23:30:00.000Z",
+  );
+
+  assert.equal(history.days.length, 1);
+  assert.equal(history.days[0].overall, "major_outage");
+  assert.equal(history.days[0].components.public_site, "major_outage");
 });
 
 test("valida código y contenido con un fetch reemplazable", async () => {
