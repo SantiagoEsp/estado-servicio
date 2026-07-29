@@ -1,0 +1,122 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  checkTarget,
+  overallFromResults,
+  shouldPersist,
+  updateIncidentsDocument,
+  updateStatusDocument,
+} from "../scripts/check-status.mjs";
+
+const baseStatus = {
+  overall: "operational",
+  checkedAt: "2026-07-29T20:00:00.000Z",
+  message: "Todo bien.",
+  components: [
+    { id: "public_site", name: "Sitio", description: "", status: "operational" },
+    { id: "merchant_panel", name: "Panel", description: "", status: "operational" },
+    { id: "catalogs_orders", name: "Pedidos", description: "", status: "operational" },
+    { id: "notifications", name: "Avisos", description: "", status: "operational" },
+  ],
+};
+
+test("clasifica el estado general según los controles", () => {
+  assert.equal(
+    overallFromResults([
+      { id: "public_site", ok: true },
+      { id: "merchant_panel", ok: true },
+    ]),
+    "operational",
+  );
+  assert.equal(
+    overallFromResults([
+      { id: "public_site", ok: true },
+      { id: "merchant_panel", ok: false },
+    ]),
+    "partial_outage",
+  );
+  assert.equal(
+    overallFromResults([
+      { id: "public_site", ok: false },
+      { id: "merchant_panel", ok: false },
+    ]),
+    "major_outage",
+  );
+});
+
+test("actualiza componentes sin publicar diagnósticos internos", () => {
+  const next = updateStatusDocument(
+    baseStatus,
+    [
+      { id: "public_site", ok: true, httpStatus: 200 },
+      { id: "merchant_panel", ok: false, httpStatus: 503 },
+    ],
+    "2026-07-29T21:00:00.000Z",
+  );
+
+  assert.equal(next.overall, "partial_outage");
+  assert.equal(next.components[0].status, "operational");
+  assert.equal(next.components[1].status, "major_outage");
+  assert.equal(next.components[2].status, "partial_outage");
+  assert.equal(JSON.stringify(next).includes("503"), false);
+});
+
+test("abre y resuelve un incidente automático", () => {
+  const startedAt = "2026-07-29T21:00:00.000Z";
+  const opened = updateIncidentsDocument(
+    { incidents: [] },
+    "operational",
+    "major_outage",
+    startedAt,
+  );
+
+  assert.equal(opened.incidents.length, 1);
+  assert.equal(opened.incidents[0].resolvedAt, null);
+
+  const resolvedAt = "2026-07-29T21:10:00.000Z";
+  const resolved = updateIncidentsDocument(
+    opened,
+    "major_outage",
+    "operational",
+    resolvedAt,
+  );
+
+  assert.equal(resolved.incidents[0].resolvedAt, resolvedAt);
+  assert.match(resolved.incidents[0].message, /restablecido/i);
+});
+
+test("persiste al cambiar el estado o después de 55 minutos", () => {
+  assert.equal(
+    shouldPersist(
+      baseStatus,
+      { ...baseStatus, overall: "major_outage" },
+      "2026-07-29T20:05:00.000Z",
+    ),
+    true,
+  );
+  assert.equal(
+    shouldPersist(baseStatus, baseStatus, "2026-07-29T20:30:00.000Z"),
+    false,
+  );
+  assert.equal(
+    shouldPersist(baseStatus, baseStatus, "2026-07-29T21:00:00.000Z"),
+    true,
+  );
+});
+
+test("valida código y contenido con un fetch reemplazable", async () => {
+  const target = {
+    id: "web",
+    url: "https://example.test",
+    acceptedStatuses: [200],
+    expectedText: "<html",
+  };
+  const result = await checkTarget(target, async () => ({
+    status: 200,
+    text: async () => "<!doctype html><html></html>",
+  }));
+
+  assert.deepEqual(result, { id: "web", ok: true, httpStatus: 200 });
+});
+
