@@ -1,7 +1,7 @@
 {
   "overall": "operational",
   "checkedAt": "2026-07-29T22:45:01.587Z",
-  "message": "Todos los servicios controlados funcionan con normalidad.",
+  "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
       "id": "public_site",
