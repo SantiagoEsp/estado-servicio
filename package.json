@@ -1,0 +1,14 @@
+{
+  "name": "estado-servicio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --test",
+    "monitor": "node scripts/check-status.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+

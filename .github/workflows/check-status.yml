@@ -1,0 +1,46 @@
+name: Verificar servicios
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: service-status-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Verificar servicios
+        run: node scripts/check-status.mjs
+
+      - name: Publicar cambios de estado
+        shell: bash
+        run: |
+          if git diff --quiet -- data/status.json data/incidents.json; then
+            echo "El estado no requiere una actualización pública."
+            exit 0
+          fi
+
+          git config user.name "status-monitor[bot]"
+          git config user.email "status-monitor[bot]@users.noreply.github.com"
+          git add data/status.json data/incidents.json
+          git commit -m "Actualizar estado del servicio"
+          git push
+

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Estado operativo e historial reciente de los servicios de la plataforma."
+    />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f4f7f8" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Estado del servicio</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script src="./assets/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Ir al estado de los servicios</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="./" aria-label="Estado del servicio, inicio">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        <span>Estado del servicio</span>
+      </a>
+      <a class="platform-link" href="https://app.sanezeit.com/" rel="noreferrer">
+        Ir a la plataforma
+        <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="contenido">
+      <section class="status-hero" aria-labelledby="estado-general">
+        <div class="hero-copy">
+          <p class="eyebrow">Disponibilidad actual</p>
+          <h1 id="estado-general">Consultando el estado…</h1>
+          <p class="hero-message" id="status-message">
+            Estamos verificando los servicios públicos.
+          </p>
+        </div>
+
+        <div class="live-stamp" aria-live="polite">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span id="last-updated">Esperando la primera verificación</span>
+        </div>
+      </section>
+
+      <section class="services-section" aria-labelledby="servicios-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Señal de servicio</p>
+            <h2 id="servicios-title">Componentes</h2>
+          </div>
+          <p>El estado se controla automáticamente desde fuera del servidor.</p>
+        </div>
+
+        <div class="signal-board" id="components" aria-live="polite">
+          <div class="signal-line" aria-hidden="true"></div>
+          <article class="service-row is-loading">
+            <span class="service-node" aria-hidden="true"></span>
+            <div>
+              <h3>Cargando componentes</h3>
+              <p>La información estará disponible en unos segundos.</p>
+            </div>
+            <span class="status-label">Verificando</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="history-section" aria-labelledby="historial-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Últimos 90 días</p>
+            <h2 id="historial-title">Historial de incidentes</h2>
+          </div>
+          <p>Publicamos interrupciones y recuperaciones confirmadas.</p>
+        </div>
+
+        <div class="incident-list" id="incidents">
+          <article class="empty-state">
+            <span aria-hidden="true">—</span>
+            <p>Consultando el historial reciente…</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Los horarios se muestran en tu zona local.</p>
+      <p>Esta página no publica infraestructura ni datos sensibles.</p>
+    </footer>
+
+    <noscript>
+      <div class="noscript-message">
+        Activá JavaScript para consultar el estado actualizado del servicio.
+      </div>
+    </noscript>
+  </body>
+</html>
+
