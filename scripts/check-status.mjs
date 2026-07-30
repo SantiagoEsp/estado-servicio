@@ -4,7 +4,6 @@ import { pathToFileURL } from "node:url";
 const STATUS_PATH = new URL("../data/status.json", import.meta.url);
 const INCIDENTS_PATH = new URL("../data/incidents.json", import.meta.url);
 const MAX_HISTORY_DAYS = 90;
-const REFRESH_AFTER_MINUTES = 55;
 const STATUS_SEVERITY = {
   unknown: -1,
   operational: 0,
@@ -202,14 +201,6 @@ export function updateIncidentsDocument(currentIncidents, previousOverall, nextO
   };
 }
 
-export function shouldPersist(previousStatus, nextStatus, now) {
-  if (previousStatus.overall !== nextStatus.overall) {
-    return true;
-  }
-
-  return Date.parse(now) - Date.parse(previousStatus.checkedAt) >= REFRESH_AFTER_MINUTES * 60 * 1000;
-}
-
 async function main() {
   const [statusRaw, incidentsRaw] = await Promise.all([
     readFile(STATUS_PATH, "utf8"),
@@ -227,18 +218,16 @@ async function main() {
     checkedAt,
   );
 
-  if (shouldPersist(currentStatus, nextStatus, checkedAt)) {
-    await Promise.all([
-      writeFile(STATUS_PATH, `${JSON.stringify(nextStatus, null, 2)}\n`, "utf8"),
-      writeFile(INCIDENTS_PATH, `${JSON.stringify(nextIncidents, null, 2)}\n`, "utf8"),
-    ]);
-  }
+  await Promise.all([
+    writeFile(STATUS_PATH, `${JSON.stringify(nextStatus, null, 2)}\n`, "utf8"),
+    writeFile(INCIDENTS_PATH, `${JSON.stringify(nextIncidents, null, 2)}\n`, "utf8"),
+  ]);
 
   process.stdout.write(
     `${JSON.stringify({
       overall: nextStatus.overall,
       checkedAt,
-      persisted: shouldPersist(currentStatus, nextStatus, checkedAt),
+      persisted: true,
       results,
     })}\n`,
   );

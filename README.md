@@ -12,9 +12,9 @@ El workflow `Verificar servicios` consulta cada 15 minutos:
 - el acceso al panel
 
 Reintenta antes de declarar una falla, actualiza los componentes afectados y
-abre o resuelve automáticamente el incidente público. Mientras el estado no
-cambie, publica una confirmación como máximo una vez por hora para evitar
-commits innecesarios.
+abre o resuelve automáticamente el incidente público. Cada control publica la
+hora confirmada para que la página muestre cuándo se verificó realmente el
+servicio.
 
 Cada componente muestra un gráfico compacto de los últimos 90 días. El historial
 empieza con la primera medición real: los días anteriores se ven como no medidos
