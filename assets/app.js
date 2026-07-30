@@ -20,6 +20,8 @@ const dateTimeFormatter = new Intl.DateTimeFormat("es-AR", {
   dateStyle: "medium",
   timeStyle: "short",
 });
+const AUTO_REFRESH_MS = 60_000;
+let renderInFlight = false;
 
 function safeStatus(value) {
   return Object.hasOwn(STATUS_LABELS, value) ? value : "unknown";
@@ -182,6 +184,11 @@ async function loadJson(path) {
 }
 
 async function render() {
+  if (renderInFlight) {
+    return;
+  }
+
+  renderInFlight = true;
   const componentsContainer = document.querySelector("#components");
   const incidentsContainer = document.querySelector("#incidents");
   const title = document.querySelector("#estado-general");
@@ -222,8 +229,16 @@ async function render() {
     message.textContent =
       "La página está disponible, pero no pudo leer la última verificación. Volvé a intentar en unos minutos.";
     lastUpdated.textContent = "Datos momentáneamente no disponibles";
+  } finally {
+    renderInFlight = false;
   }
 }
 
-render();
+void render();
+window.setInterval(() => void render(), AUTO_REFRESH_MS);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    void render();
+  }
+});
 
