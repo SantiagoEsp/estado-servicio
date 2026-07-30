@@ -4,7 +4,6 @@ import assert from "node:assert/strict";
 import {
   checkTarget,
   overallFromResults,
-  shouldPersist,
   updateDailyHistory,
   updateIncidentsDocument,
   updateStatusDocument,
@@ -63,6 +62,22 @@ test("actualiza componentes sin publicar diagnósticos internos", () => {
   assert.equal(JSON.stringify(next).includes("503"), false);
 });
 
+test("renueva la hora en cada control aunque todo siga operativo", () => {
+  const checkedAt = "2026-07-29T20:15:00.000Z";
+  const next = updateStatusDocument(
+    baseStatus,
+    [
+      { id: "public_site", ok: true, httpStatus: 200 },
+      { id: "merchant_panel", ok: true, httpStatus: 200 },
+    ],
+    checkedAt,
+  );
+
+  assert.equal(next.overall, "operational");
+  assert.equal(next.checkedAt, checkedAt);
+  assert.notEqual(next.checkedAt, baseStatus.checkedAt);
+});
+
 test("abre y resuelve un incidente automático", () => {
   const startedAt = "2026-07-29T21:00:00.000Z";
   const opened = updateIncidentsDocument(
@@ -85,25 +100,6 @@ test("abre y resuelve un incidente automático", () => {
 
   assert.equal(resolved.incidents[0].resolvedAt, resolvedAt);
   assert.match(resolved.incidents[0].message, /restablecido/i);
-});
-
-test("persiste al cambiar el estado o después de 55 minutos", () => {
-  assert.equal(
-    shouldPersist(
-      baseStatus,
-      { ...baseStatus, overall: "major_outage" },
-      "2026-07-29T20:05:00.000Z",
-    ),
-    true,
-  );
-  assert.equal(
-    shouldPersist(baseStatus, baseStatus, "2026-07-29T20:30:00.000Z"),
-    false,
-  );
-  assert.equal(
-    shouldPersist(baseStatus, baseStatus, "2026-07-29T21:00:00.000Z"),
-    true,
-  );
 });
 
 test("registra disponibilidad diaria sin inventar días anteriores", () => {
