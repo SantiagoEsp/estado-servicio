@@ -6,7 +6,8 @@ interrupción del servidor.
 
 ## Controles
 
-El workflow `Verificar servicios` consulta cada 15 minutos:
+El workflow `Verificar servicios` consulta cuatro veces por hora, en minutos
+desplazados para reducir las demoras del programador de GitHub Actions:
 
 - la página pública
 - el acceso al panel
