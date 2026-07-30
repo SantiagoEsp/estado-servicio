@@ -2,7 +2,8 @@ name: Verificar servicios
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    # Evita los minutos de mayor congestión de GitHub Actions.
+    - cron: "3,18,33,48 * * * *"
   workflow_dispatch:
 
 concurrency:
