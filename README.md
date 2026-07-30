@@ -14,7 +14,7 @@ El workflow `Verificar servicios` consulta cada 15 minutos:
 Reintenta antes de declarar una falla, actualiza los componentes afectados y
 abre o resuelve automáticamente el incidente público. Cada control publica la
 hora confirmada para que la página muestre cuándo se verificó realmente el
-servicio.
+servicio y despliega el JSON actualizado directamente en GitHub Pages.
 
 Cada componente muestra un gráfico compacto de los últimos 90 días. El historial
 empieza con la primera medición real: los días anteriores se ven como no medidos
