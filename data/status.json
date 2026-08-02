@@ -1,31 +1,31 @@
 {
-  "overall": "major_outage",
-  "checkedAt": "2026-08-02T06:15:40.037Z",
-  "message": "La plataforma no está respondiendo correctamente.",
+  "overall": "operational",
+  "checkedAt": "2026-08-02T07:12:56.576Z",
+  "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
       "id": "public_site",
       "name": "Sitio público",
       "description": "Inicio y acceso general a la plataforma.",
-      "status": "major_outage"
+      "status": "operational"
     },
     {
       "id": "merchant_panel",
       "name": "Panel de comercios",
       "description": "Ingreso y herramientas de gestión.",
-      "status": "major_outage"
+      "status": "operational"
     },
     {
       "id": "catalogs_orders",
       "name": "Catálogos y pedidos",
       "description": "Publicación de catálogos y recepción de pedidos.",
-      "status": "major_outage"
+      "status": "operational"
     },
     {
       "id": "notifications",
       "name": "Notificaciones",
       "description": "Avisos operativos enviados por la plataforma.",
-      "status": "major_outage"
+      "status": "operational"
     }
   ],
   "history": {
