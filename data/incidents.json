@@ -3,9 +3,9 @@
     {
       "id": "automatic-20260803221153",
       "title": "Interrupción del servicio",
-      "message": "La plataforma no está respondiendo correctamente.",
+      "message": "El funcionamiento normal fue restablecido.",
       "startedAt": "2026-08-03T22:11:53.287Z",
-      "resolvedAt": null
+      "resolvedAt": "2026-08-03T23:11:38.970Z"
     },
     {
       "id": "automatic-20260803131302",
