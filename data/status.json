@@ -1,6 +1,6 @@
 {
   "overall": "operational",
-  "checkedAt": "2026-08-05T23:30:04.519Z",
+  "checkedAt": "2026-08-06T00:54:04.895Z",
   "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
@@ -109,6 +109,16 @@
           "merchant_panel": "major_outage",
           "catalogs_orders": "major_outage",
           "notifications": "major_outage"
+        }
+      },
+      {
+        "date": "2026-08-06",
+        "overall": "operational",
+        "components": {
+          "public_site": "operational",
+          "merchant_panel": "operational",
+          "catalogs_orders": "operational",
+          "notifications": "operational"
         }
       }
     ]
