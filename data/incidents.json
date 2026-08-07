@@ -1,6 +1,14 @@
 {
   "incidents": [
     {
+      "id": "automatic-20260807224531",
+      "title": "Interrupción del servicio",
+      "message": "La plataforma no está respondiendo correctamente.",
+      "lastHealthyAt": "2026-08-07T22:30:45.673Z",
+      "startedAt": "2026-08-07T22:45:31.808Z",
+      "resolvedAt": null
+    },
+    {
       "id": "automatic-20260806041434",
       "title": "Falsa alarma del control",
       "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
