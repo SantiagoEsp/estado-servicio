@@ -63,19 +63,22 @@ cuerpo.
 El `schedule` del workflow queda activo como respaldo: si el disparador externo
 falla, se sigue midiendo una vez por hora.
 
-#### El token y su vencimiento
+#### El token
 
-Es un token *fine-grained*, limitado a este repositorio, con el único permiso
-`Actions: read and write`. Con ese alcance, quien lo obtenga solo puede disparar
-este control.
+Es un token *fine-grained* sin vencimiento, limitado a este repositorio y con el
+único permiso `Actions: read and write`. Con ese alcance, quien lo obtenga solo
+puede disparar este control: no lee código, no toca otros repositorios y no
+publica nada.
 
-> **Vence el 6 de septiembre de 2026.**
+Al no vencer, no hay una fecha que recordar, pero tampoco caduca solo si alguna
+vez queda expuesto. Si eso pasa, se revoca desde
+`github.com/settings/personal-access-tokens`, se genera otro con el mismo
+alcance y se actualiza el encabezado en cron-job.org.
 
-Cuando venza, cron-job.org va a recibir `401` y GitHub va a dejar de recibir
-disparos. **Nada se rompe de forma visible**: la página sigue publicando y el
-`schedule` sigue midiendo una vez por hora, así que la única señal es que el
-conteo diario de controles cae de unos 90 a unos 20. Conviene renovarlo antes de
-esa fecha y actualizar acá la nueva.
+Si el disparo dejara de llegar por cualquier motivo, **nada se rompe de forma
+visible**: la página sigue publicando y el `schedule` sigue midiendo una vez por
+hora. La única señal es que el conteo diario de controles cae de unos 90 a unos
+20.
 
 ## Desarrollo
 
