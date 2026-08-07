@@ -474,6 +474,12 @@ body[data-overall="major_outage"] .live-dot {
   line-height: 1.5;
 }
 
+.incident p.incident-window {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
 .incident time {
   color: var(--slate);
   font-family: var(--data);
