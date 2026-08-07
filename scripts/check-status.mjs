@@ -4,14 +4,7 @@ import { pathToFileURL } from "node:url";
 const STATUS_PATH = new URL("../data/status.json", import.meta.url);
 const INCIDENTS_PATH = new URL("../data/incidents.json", import.meta.url);
 const MAX_HISTORY_DAYS = 90;
-const STATUS_SEVERITY = {
-  unknown: -1,
-  operational: 0,
-  maintenance: 1,
-  degraded: 2,
-  partial_outage: 3,
-  major_outage: 4,
-};
+const USER_AGENT = "EstadoServicio/1.0 (+https://estado.sanezeit.com)";
 
 export const TARGETS = [
   {
@@ -26,6 +19,16 @@ export const TARGETS = [
     acceptedStatuses: [200],
     expectedText: "<html",
   },
+];
+
+/**
+ * Destinos ajenos a la plataforma que sirven para saber si el problema es
+ * nuestro o de quien controla. Cuando el control corre en un runner alquilado,
+ * una salida a internet intermitente se veía igual que un servicio caído.
+ */
+export const NETWORK_CANARIES = [
+  "https://api.github.com/zen",
+  "https://www.cloudflare.com/cdn-cgi/trace",
 ];
 
 const STATUS_MESSAGES = {
@@ -44,9 +47,7 @@ export async function checkTarget(target, fetchImplementation = fetch) {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       const response = await fetchImplementation(target.url, {
-        headers: {
-          "User-Agent": "EstadoServicio/1.0 (+https://estado.sanezeit.com)",
-        },
+        headers: { "User-Agent": USER_AGENT },
         redirect: "follow",
         signal: AbortSignal.timeout(20_000),
       });
@@ -65,10 +66,31 @@ export async function checkTarget(target, fetchImplementation = fetch) {
       break;
     }
 
-    await delay(5_000);
+    // Un corte de red suele durar más que unos segundos: espaciar los
+    // reintentos evita confundirlo con un servicio caído.
+    await delay(10_000);
   }
 
   return { id: target.id, ...lastResult };
+}
+
+/**
+ * Confirma que el control tiene salida a internet. Si ningún destino externo
+ * responde, lo que falla es la conexión de quien controla y el resultado no
+ * dice nada sobre la plataforma.
+ */
+export async function hasNetworkAccess(fetchImplementation = fetch) {
+  const attempts = NETWORK_CANARIES.map(async (url) => {
+    const response = await fetchImplementation(url, {
+      headers: { "User-Agent": USER_AGENT },
+      redirect: "follow",
+      signal: AbortSignal.timeout(10_000),
+    });
+    return response.ok === true || response.status === 200;
+  });
+
+  const settled = await Promise.allSettled(attempts);
+  return settled.some((result) => result.status === "fulfilled" && result.value === true);
 }
 
 export function overallFromResults(results) {
@@ -119,38 +141,52 @@ export function updateStatusDocument(currentStatus, results, checkedAt) {
   };
 }
 
-function worseStatus(first, second) {
-  return STATUS_SEVERITY[first] >= STATUS_SEVERITY[second] ? first : second;
+/**
+ * Resume un día a partir de cuántos controles hubo y cuántos fallaron. Antes se
+ * guardaba el peor resultado del día, así que un control fallido de treinta
+ * pintaba la jornada entera como caída total.
+ */
+export function dayStatusFromCounts(checks, failedCount) {
+  if (!checks || failedCount <= 0) {
+    return "operational";
+  }
+
+  const ratio = failedCount / checks;
+
+  if (ratio < 0.2) {
+    return "degraded";
+  }
+
+  return ratio < 0.6 ? "partial_outage" : "major_outage";
+}
+
+function dayOverall(checks, failed) {
+  const values = Object.values(failed);
+  return dayStatusFromCounts(checks, values.length ? Math.max(...values) : 0);
 }
 
 export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
   const date = checkedAt.slice(0, 10);
   const history = currentHistory ?? { startedAt: date, days: [] };
-  const components = Object.fromEntries(
-    nextStatus.components.map((component) => [component.id, component.status]),
-  );
-  const nextDay = {
-    date,
-    overall: nextStatus.overall,
-    components,
-  };
-  const existingIndex = history.days.findIndex((day) => day.date === date);
   const days = [...history.days];
+  const existingIndex = days.findIndex((day) => day.date === date);
+  const existing = existingIndex === -1 ? null : days[existingIndex];
+
+  const checks = (existing?.checks ?? 0) + 1;
+  const failed = { ...(existing?.failed ?? {}) };
+
+  for (const component of nextStatus.components) {
+    const previousFailures = failed[component.id] ?? 0;
+    failed[component.id] =
+      previousFailures + (component.status === "operational" ? 0 : 1);
+  }
+
+  const nextDay = { date, checks, failed, overall: dayOverall(checks, failed) };
 
   if (existingIndex === -1) {
     days.push(nextDay);
   } else {
-    const existing = days[existingIndex];
-    days[existingIndex] = {
-      date,
-      overall: worseStatus(existing.overall, nextDay.overall),
-      components: Object.fromEntries(
-        Object.entries(nextDay.components).map(([id, status]) => [
-          id,
-          worseStatus(existing.components?.[id] ?? "unknown", status),
-        ]),
-      ),
-    };
+    days[existingIndex] = nextDay;
   }
 
   return {
@@ -167,7 +203,13 @@ function incidentTitle(status) {
     : "Interrupción parcial del servicio";
 }
 
-export function updateIncidentsDocument(currentIncidents, previousOverall, nextOverall, now) {
+export function updateIncidentsDocument(
+  currentIncidents,
+  previousOverall,
+  nextOverall,
+  now,
+  lastHealthyAt = null,
+) {
   const incidents = [...currentIncidents.incidents];
   const openIncidentIndex = incidents.findIndex((incident) => !incident.resolvedAt);
   const wasHealthy = previousOverall === "operational";
@@ -178,6 +220,9 @@ export function updateIncidentsDocument(currentIncidents, previousOverall, nextO
       id: `automatic-${now.replaceAll(/[^0-9]/g, "").slice(0, 14)}`,
       title: incidentTitle(nextOverall),
       message: STATUS_MESSAGES[nextOverall],
+      // El control es espaciado: lo único cierto es que entre este momento y el
+      // control sano anterior algo dejó de responder.
+      lastHealthyAt,
       startedAt: now,
       resolvedAt: null,
     });
@@ -210,12 +255,28 @@ async function main() {
   const currentIncidents = JSON.parse(incidentsRaw);
   const checkedAt = new Date().toISOString();
   const results = await Promise.all(TARGETS.map((target) => checkTarget(target)));
+
+  if (!results.some((result) => result.ok) && !(await hasNetworkAccess())) {
+    // Sin salida a internet no se puede afirmar nada: dejar el estado como
+    // estaba en vez de publicar una caída que nadie comprobó.
+    process.stdout.write(
+      `${JSON.stringify({
+        overall: currentStatus.overall,
+        checkedAt,
+        persisted: false,
+        skipped: "sin salida a internet desde el control",
+      })}\n`,
+    );
+    return;
+  }
+
   const nextStatus = updateStatusDocument(currentStatus, results, checkedAt);
   const nextIncidents = updateIncidentsDocument(
     currentIncidents,
     currentStatus.overall,
     nextStatus.overall,
     checkedAt,
+    currentStatus.checkedAt ?? null,
   );
 
   await Promise.all([
@@ -237,4 +298,3 @@ const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : null
 if (invokedPath === import.meta.url) {
   await main();
 }
-

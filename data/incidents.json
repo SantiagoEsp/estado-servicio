@@ -2,171 +2,195 @@
   "incidents": [
     {
       "id": "automatic-20260806041434",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-06T04:14:34.274Z",
-      "resolvedAt": "2026-08-06T06:47:44.759Z"
+      "resolvedAt": "2026-08-06T06:47:44.759Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260805180538",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-05T18:05:38.278Z",
-      "resolvedAt": "2026-08-05T19:55:34.256Z"
+      "resolvedAt": "2026-08-05T19:55:34.256Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260804162734",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-04T16:27:34.080Z",
-      "resolvedAt": "2026-08-04T17:08:56.973Z"
+      "resolvedAt": "2026-08-04T17:08:56.973Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260804071301",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-04T07:13:01.667Z",
-      "resolvedAt": "2026-08-04T09:16:41.130Z"
+      "resolvedAt": "2026-08-04T09:16:41.130Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260804035258",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-04T03:52:58.967Z",
-      "resolvedAt": "2026-08-04T06:11:42.884Z"
+      "resolvedAt": "2026-08-04T06:11:42.884Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260803221153",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-03T22:11:53.287Z",
-      "resolvedAt": "2026-08-03T23:11:38.970Z"
+      "resolvedAt": "2026-08-03T23:11:38.970Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260803131302",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-03T13:13:02.383Z",
-      "resolvedAt": "2026-08-03T14:03:53.427Z"
+      "resolvedAt": "2026-08-03T14:03:53.427Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260802233740",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-02T23:37:40.434Z",
-      "resolvedAt": "2026-08-03T00:57:59.778Z"
+      "resolvedAt": "2026-08-03T00:57:59.778Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260802180834",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-02T18:08:34.313Z",
-      "resolvedAt": "2026-08-02T19:12:41.220Z"
+      "resolvedAt": "2026-08-02T19:12:41.220Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260802151038",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-02T15:10:38.921Z",
-      "resolvedAt": "2026-08-02T15:41:00.618Z"
+      "resolvedAt": "2026-08-02T15:41:00.618Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260802102108",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-02T10:21:08.078Z",
-      "resolvedAt": "2026-08-02T11:03:24.885Z"
+      "resolvedAt": "2026-08-02T11:03:24.885Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260802061540",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-02T06:15:40.037Z",
-      "resolvedAt": "2026-08-02T07:12:56.576Z"
+      "resolvedAt": "2026-08-02T07:12:56.576Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260801085343",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-08-01T08:53:43.539Z",
-      "resolvedAt": "2026-08-01T09:44:18.841Z"
+      "resolvedAt": "2026-08-01T09:44:18.841Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260731233803",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-31T23:38:03.089Z",
-      "resolvedAt": "2026-08-01T00:09:24.831Z"
+      "resolvedAt": "2026-08-01T00:09:24.831Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260731221117",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-31T22:11:17.207Z",
-      "resolvedAt": "2026-07-31T22:39:04.560Z"
+      "resolvedAt": "2026-07-31T22:39:04.560Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260731193527",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-31T19:35:27.063Z",
-      "resolvedAt": "2026-07-31T20:14:22.258Z"
+      "resolvedAt": "2026-07-31T20:14:22.258Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260731181442",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-31T18:14:42.408Z",
-      "resolvedAt": "2026-07-31T18:48:33.432Z"
+      "resolvedAt": "2026-07-31T18:48:33.432Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260731051653",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-31T05:16:53.352Z",
-      "resolvedAt": "2026-07-31T06:25:07.299Z"
+      "resolvedAt": "2026-07-31T06:25:07.299Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260730224002",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-30T22:40:02.607Z",
-      "resolvedAt": "2026-07-30T23:11:51.870Z"
+      "resolvedAt": "2026-07-30T23:11:51.870Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260730211232",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-30T21:12:32.618Z",
-      "resolvedAt": "2026-07-30T21:42:45.127Z"
+      "resolvedAt": "2026-07-30T21:42:45.127Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260730181331",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-30T18:13:31.070Z",
-      "resolvedAt": "2026-07-30T18:49:24.121Z"
+      "resolvedAt": "2026-07-30T18:49:24.121Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260730160719",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-30T16:07:19.213Z",
-      "resolvedAt": "2026-07-30T16:50:17.424Z"
+      "resolvedAt": "2026-07-30T16:50:17.424Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260730114212",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-30T11:42:12.937Z",
-      "resolvedAt": "2026-07-30T12:17:32.486Z"
+      "resolvedAt": "2026-07-30T12:17:32.486Z",
+      "kind": "measurement_error"
     },
     {
       "id": "automatic-20260730014056",
-      "title": "Interrupción del servicio",
-      "message": "El funcionamiento normal fue restablecido.",
+      "title": "Falsa alarma del control",
+      "message": "El control externo no pudo consultar la plataforma y publicó el intento fallido como una interrupción. Revisamos el servidor y no hubo caída.",
       "startedAt": "2026-07-30T01:40:56.764Z",
-      "resolvedAt": "2026-07-30T02:42:03.585Z"
+      "resolvedAt": "2026-07-30T02:42:03.585Z",
+      "kind": "measurement_error"
     }
   ]
 }

@@ -462,6 +462,39 @@ body[data-overall="major_outage"] .live-dot {
   box-shadow: 0 0 0 6px var(--signal-soft);
 }
 
+/* Las falsas alarmas no informan nada sobre el servicio: van juntas, apagadas y
+   cerradas, para no competir con las interrupciones reales. */
+.false-alarms {
+  padding: 12px 16px;
+  border: 1px dashed var(--rule);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 35%);
+}
+
+.false-alarms summary {
+  color: var(--slate);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.false-alarms p {
+  margin: 8px 0 0;
+  color: var(--slate);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+.false-alarms ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--slate);
+  font-family: var(--data);
+  font-size: 0.7rem;
+  line-height: 1.9;
+}
+
 .incident h3 {
   margin-bottom: 7px;
   font-size: 1rem;
@@ -472,6 +505,12 @@ body[data-overall="major_outage"] .live-dot {
   color: var(--slate);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.incident p.incident-window {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  opacity: 0.75;
 }
 
 .incident time {

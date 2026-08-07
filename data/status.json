@@ -33,103 +33,113 @@
     "days": [
       {
         "date": "2026-07-29",
-        "overall": "operational",
-        "components": {
-          "public_site": "operational",
-          "merchant_panel": "operational",
-          "catalogs_orders": "operational",
-          "notifications": "operational"
-        }
+        "checks": 1,
+        "failed": {
+          "public_site": 0,
+          "merchant_panel": 0,
+          "catalogs_orders": 0,
+          "notifications": 0
+        },
+        "overall": "operational"
       },
       {
         "date": "2026-07-30",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 34,
+        "failed": {
+          "public_site": 6,
+          "merchant_panel": 6,
+          "catalogs_orders": 6,
+          "notifications": 6
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-07-31",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 31,
+        "failed": {
+          "public_site": 5,
+          "merchant_panel": 5,
+          "catalogs_orders": 5,
+          "notifications": 5
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-01",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 37,
+        "failed": {
+          "public_site": 1,
+          "merchant_panel": 1,
+          "catalogs_orders": 1,
+          "notifications": 1
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-02",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 37,
+        "failed": {
+          "public_site": 6,
+          "merchant_panel": 6,
+          "catalogs_orders": 6,
+          "notifications": 6
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-03",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 27,
+        "failed": {
+          "public_site": 4,
+          "merchant_panel": 4,
+          "catalogs_orders": 4,
+          "notifications": 4
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-04",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 26,
+        "failed": {
+          "public_site": 5,
+          "merchant_panel": 5,
+          "catalogs_orders": 5,
+          "notifications": 5
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-05",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 12,
+        "failed": {
+          "public_site": 1,
+          "merchant_panel": 1,
+          "catalogs_orders": 1,
+          "notifications": 1
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-06",
-        "overall": "major_outage",
-        "components": {
-          "public_site": "major_outage",
-          "merchant_panel": "major_outage",
-          "catalogs_orders": "major_outage",
-          "notifications": "major_outage"
-        }
+        "checks": 6,
+        "failed": {
+          "public_site": 1,
+          "merchant_panel": 1,
+          "catalogs_orders": 1,
+          "notifications": 1
+        },
+        "overall": "degraded"
       },
       {
         "date": "2026-08-07",
-        "overall": "operational",
-        "components": {
-          "public_site": "operational",
-          "merchant_panel": "operational",
-          "catalogs_orders": "operational",
-          "notifications": "operational"
-        }
+        "checks": 15,
+        "failed": {
+          "public_site": 0,
+          "merchant_panel": 0,
+          "catalogs_orders": 0,
+          "notifications": 0
+        },
+        "overall": "operational"
       }
     ]
   }

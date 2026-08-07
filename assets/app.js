@@ -26,6 +26,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat("es-AR", {
   dateStyle: "medium",
   timeStyle: "short",
 });
+const timeFormatter = new Intl.DateTimeFormat("es-AR", { timeStyle: "short" });
+const shortDateFormatter = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "short",
+});
 const AUTO_REFRESH_MS = 60_000;
 let renderInFlight = false;
 
@@ -36,6 +41,11 @@ function safeStatus(value) {
 function formatDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "Horario sin confirmar" : dateTimeFormatter.format(date);
+}
+
+function formatTime(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "hora sin confirmar" : timeFormatter.format(date);
 }
 
 function componentRow(component) {
@@ -77,20 +87,73 @@ function recentDays(checkedAt, count = 90) {
   });
 }
 
+// Misma regla que usa el control al cerrar el día: un control fallido entre
+// muchos es una molestia, no una caída total.
+function dayStatusFromCounts(checks, failedCount) {
+  if (!checks || failedCount <= 0) {
+    return "operational";
+  }
+
+  const ratio = failedCount / checks;
+
+  if (ratio < 0.2) {
+    return "degraded";
+  }
+
+  return ratio < 0.6 ? "partial_outage" : "major_outage";
+}
+
+function dayDetail(entry, componentId) {
+  if (!entry) {
+    return { status: "unknown", checks: 0, failed: 0 };
+  }
+
+  if (typeof entry.checks === "number") {
+    const failed = entry.failed?.[componentId] ?? 0;
+    return {
+      status: dayStatusFromCounts(entry.checks, failed),
+      checks: entry.checks,
+      failed,
+    };
+  }
+
+  // Días guardados con el formato anterior, que solo conservaba una etiqueta.
+  const status = safeStatus(entry.components?.[componentId] ?? entry.overall);
+  return { status, checks: 0, failed: 0 };
+}
+
 function componentHistory(component, statusData) {
   const historyByDay = new Map(
     (statusData.history?.days ?? []).map((entry) => [entry.date, entry]),
   );
   const days = recentDays(statusData.checkedAt);
-  const statuses = days.map((date) => {
-    const entry = historyByDay.get(date);
-    return entry ? safeStatus(entry.components?.[component.id] ?? entry.overall) : "unknown";
-  });
-  const measured = statuses.filter((status) => status !== "unknown");
-  const operational = measured.filter((status) => status === "operational").length;
-  const percentage = measured.length ? Math.round((operational / measured.length) * 1000) / 10 : null;
+  const details = days.map((date) => dayDetail(historyByDay.get(date), component.id));
+  const measured = details.filter((detail) => detail.status !== "unknown");
+  const totalChecks = measured.reduce((sum, detail) => sum + detail.checks, 0);
+  const totalFailed = measured.reduce((sum, detail) => sum + detail.failed, 0);
+  const percentage = totalChecks
+    ? Math.round(((totalChecks - totalFailed) / totalChecks) * 1000) / 10
+    : null;
 
-  return { days, statuses, measuredDays: measured.length, percentage };
+  return { days, details, measuredDays: measured.length, totalChecks, percentage };
+}
+
+function dayTitle(date, detail) {
+  if (detail.status === "unknown") {
+    return `${date} · Sin medición`;
+  }
+
+  if (!detail.checks) {
+    return `${date} · ${STATUS_LABELS[detail.status]}`;
+  }
+
+  const controles = detail.checks === 1 ? "1 control" : `${detail.checks} controles`;
+
+  if (!detail.failed) {
+    return `${date} · ${controles}, sin problemas`;
+  }
+
+  return `${date} · ${detail.failed} de ${controles} con problemas`;
 }
 
 function uptimeChart(component, statusData) {
@@ -102,19 +165,16 @@ function uptimeChart(component, statusData) {
   bars.className = "uptime-bars";
   bars.setAttribute(
     "aria-label",
-    history.measuredDays
-      ? `${component.name}: ${history.percentage}% de disponibilidad durante ${history.measuredDays} días medidos`
-      : `${component.name}: el historial comienza hoy`,
+    history.percentage === null
+      ? `${component.name}: el historial comienza hoy`
+      : `${component.name}: ${history.percentage}% de los ${history.totalChecks} controles del período sin problemas`,
   );
 
-  history.statuses.forEach((dayStatus, index) => {
+  history.details.forEach((detail, index) => {
     const bar = document.createElement("span");
     bar.className = "uptime-day";
-    bar.dataset.status = dayStatus;
-    bar.title =
-      dayStatus === "unknown"
-        ? `${history.days[index]} · Sin medición`
-        : `${history.days[index]} · ${STATUS_LABELS[dayStatus]}`;
+    bar.dataset.status = detail.status;
+    bar.title = dayTitle(history.days[index], detail);
     bars.append(bar);
   });
 
@@ -126,7 +186,7 @@ function uptimeChart(component, statusData) {
   percentage.textContent =
     history.percentage === null
       ? "Comienza hoy"
-      : `${history.percentage.toLocaleString("es-AR")}% del período medido`;
+      : `${history.percentage.toLocaleString("es-AR")}% de los controles sin problemas`;
   const today = document.createElement("span");
   today.textContent = "Hoy";
   meta.append(period, percentage, today);
@@ -151,6 +211,17 @@ function incidentRow(incident) {
   description.textContent = incident.message;
   copy.append(title, description);
 
+  // Los controles son espaciados: sabemos entre qué dos el servicio dejó de
+  // responder, no el minuto exacto en que empezó.
+  if (incident.lastHealthyAt) {
+    const window = document.createElement("p");
+    window.className = "incident-window";
+    window.textContent = `Detectado entre el control de las ${formatTime(
+      incident.lastHealthyAt,
+    )} y el de las ${formatTime(incident.startedAt)}.`;
+    copy.append(window);
+  }
+
   const time = document.createElement("time");
   time.dateTime = incident.resolvedAt || incident.startedAt;
   time.textContent = incident.resolvedAt
@@ -170,10 +241,48 @@ function emptyHistory() {
   mark.textContent = "✓";
 
   const message = document.createElement("p");
-  message.textContent = "No hubo incidentes informados en los últimos 90 días.";
+  message.textContent = "No hubo interrupciones confirmadas en los últimos 90 días.";
 
   article.append(mark, message);
   return article;
+}
+
+/**
+ * Las falsas alarmas van juntas en un solo bloque. Son dos docenas de avisos
+ * idénticos que no dicen nada del servicio: sueltos tapaban el historial.
+ */
+function falseAlarmGroup(incidents) {
+  const details = document.createElement("details");
+  details.className = "false-alarms";
+
+  const summary = document.createElement("summary");
+  const fechas = incidents
+    .map((incident) => Date.parse(incident.startedAt))
+    .filter((value) => !Number.isNaN(value))
+    .sort((first, second) => first - second);
+  const periodo = fechas.length
+    ? ` entre el ${shortDateFormatter.format(fechas[0])} y el ${shortDateFormatter.format(
+        fechas[fechas.length - 1],
+      )}`
+    : "";
+  summary.textContent =
+    incidents.length === 1
+      ? `1 falsa alarma del control${periodo}`
+      : `${incidents.length} falsas alarmas del control${periodo}`;
+
+  const explanation = document.createElement("p");
+  explanation.textContent =
+    "El control externo no pudo consultar la plataforma y publicó cada intento fallido como una interrupción. Revisamos el servidor y no hubo caída.";
+
+  const list = document.createElement("ul");
+  for (const incident of incidents) {
+    const item = document.createElement("li");
+    item.textContent = formatDate(incident.startedAt);
+    list.append(item);
+  }
+
+  details.append(summary, explanation, list);
+  return details;
 }
 
 async function loadJson(path) {
@@ -236,10 +345,16 @@ async function render() {
     });
     componentsContainer.append(line, ...componentRows);
 
+    const falseAlarms = incidentsData.incidents.filter(
+      (incident) => incident.kind === "measurement_error",
+    );
+    const outages = incidentsData.incidents.filter(
+      (incident) => incident.kind !== "measurement_error",
+    );
+
     incidentsContainer.replaceChildren(
-      ...(incidentsData.incidents.length
-        ? incidentsData.incidents.map(incidentRow)
-        : [emptyHistory()]),
+      ...(outages.length ? outages.map(incidentRow) : [emptyHistory()]),
+      ...(falseAlarms.length ? [falseAlarmGroup(falseAlarms)] : []),
     );
   } catch {
     document.body.dataset.overall = "unknown";

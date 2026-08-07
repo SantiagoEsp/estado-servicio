@@ -1,0 +1,4 @@
+# El control escribe los JSON desde Linux con saltos LF. Fijarlo evita que una
+# edicion desde Windows reescriba el archivo entero por el fin de linea.
+* text=auto eol=lf
+*.png binary
