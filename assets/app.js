@@ -27,6 +27,10 @@ const dateTimeFormatter = new Intl.DateTimeFormat("es-AR", {
   timeStyle: "short",
 });
 const timeFormatter = new Intl.DateTimeFormat("es-AR", { timeStyle: "short" });
+const shortDateFormatter = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "short",
+});
 const AUTO_REFRESH_MS = 60_000;
 let renderInFlight = false;
 
@@ -237,10 +241,48 @@ function emptyHistory() {
   mark.textContent = "✓";
 
   const message = document.createElement("p");
-  message.textContent = "No hubo incidentes informados en los últimos 90 días.";
+  message.textContent = "No hubo interrupciones confirmadas en los últimos 90 días.";
 
   article.append(mark, message);
   return article;
+}
+
+/**
+ * Las falsas alarmas van juntas en un solo bloque. Son dos docenas de avisos
+ * idénticos que no dicen nada del servicio: sueltos tapaban el historial.
+ */
+function falseAlarmGroup(incidents) {
+  const details = document.createElement("details");
+  details.className = "false-alarms";
+
+  const summary = document.createElement("summary");
+  const fechas = incidents
+    .map((incident) => Date.parse(incident.startedAt))
+    .filter((value) => !Number.isNaN(value))
+    .sort((first, second) => first - second);
+  const periodo = fechas.length
+    ? ` entre el ${shortDateFormatter.format(fechas[0])} y el ${shortDateFormatter.format(
+        fechas[fechas.length - 1],
+      )}`
+    : "";
+  summary.textContent =
+    incidents.length === 1
+      ? `1 falsa alarma del control${periodo}`
+      : `${incidents.length} falsas alarmas del control${periodo}`;
+
+  const explanation = document.createElement("p");
+  explanation.textContent =
+    "El control externo no pudo consultar la plataforma y publicó cada intento fallido como una interrupción. Revisamos el servidor y no hubo caída.";
+
+  const list = document.createElement("ul");
+  for (const incident of incidents) {
+    const item = document.createElement("li");
+    item.textContent = formatDate(incident.startedAt);
+    list.append(item);
+  }
+
+  details.append(summary, explanation, list);
+  return details;
 }
 
 async function loadJson(path) {
@@ -303,10 +345,16 @@ async function render() {
     });
     componentsContainer.append(line, ...componentRows);
 
+    const falseAlarms = incidentsData.incidents.filter(
+      (incident) => incident.kind === "measurement_error",
+    );
+    const outages = incidentsData.incidents.filter(
+      (incident) => incident.kind !== "measurement_error",
+    );
+
     incidentsContainer.replaceChildren(
-      ...(incidentsData.incidents.length
-        ? incidentsData.incidents.map(incidentRow)
-        : [emptyHistory()]),
+      ...(outages.length ? outages.map(incidentRow) : [emptyHistory()]),
+      ...(falseAlarms.length ? [falseAlarmGroup(falseAlarms)] : []),
     );
   } catch {
     document.body.dataset.overall = "unknown";
