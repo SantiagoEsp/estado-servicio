@@ -36,32 +36,46 @@ Cada día guarda cuántos controles hubo y cuántos fallaron. Antes se guardaba 
 peor resultado del día, así que un control fallido de treinta pintaba la jornada
 entera como caída total.
 
-### Frecuencia real de los controles
+### Quién dispara los controles
 
-El workflow pide cuatro corridas por hora, pero **GitHub entrega alrededor de
-una**. El evento `schedule` corre con baja prioridad y se pospone; es un
-comportamiento conocido de Actions y no hay forma de forzarlo desde el propio
-workflow. Se llegó a medir 34 controles el 30/07 y solo 6 el 06/08.
+El reloj de GitHub no alcanza. El workflow pide cuatro corridas por hora y
+**GitHub entrega alrededor de una**: el evento `schedule` corre con baja
+prioridad y se pospone, es un comportamiento conocido de Actions y no se puede
+forzar desde el propio workflow. Se llegó a medir 34 controles el 30/07 y solo
+6 el 06/08.
 
-Esto no afecta el estado que ve quien entra a la página, porque el navegador
-consulta la aplicación en vivo. Afecta la resolución del historial y demora la
-detección de un corte real.
-
-Para recuperar la frecuencia hay que disparar el control desde afuera. El evento
-`workflow_dispatch` **sí** se atiende casi al instante, así que basta con un
-programador externo que llame cada cinco minutos a:
+Por eso el disparo real viene de afuera, de una tarea en **cron-job.org** que
+cada quince minutos llama a:
 
 ```
 POST https://api.github.com/repos/SantiagoEsp/estado-servicio/actions/workflows/check-status.yml/dispatches
 Authorization: Bearer <token>
+Accept: application/vnd.github+json
 Content-Type: application/json
 
 {"ref":"main"}
 ```
 
-El token debe ser *fine-grained*, limitado a este repositorio y con el único
-permiso `Actions: read and write`. Así, en el peor caso, quien lo obtenga solo
-puede disparar este control.
+A diferencia de `schedule`, `workflow_dispatch` se atiende al instante: medido,
+la corrida arranca dos segundos después del pedido. GitHub responde `204` sin
+cuerpo.
+
+El `schedule` del workflow queda activo como respaldo: si el disparador externo
+falla, se sigue midiendo una vez por hora.
+
+#### El token y su vencimiento
+
+Es un token *fine-grained*, limitado a este repositorio, con el único permiso
+`Actions: read and write`. Con ese alcance, quien lo obtenga solo puede disparar
+este control.
+
+> **Vence el 6 de septiembre de 2026.**
+
+Cuando venza, cron-job.org va a recibir `401` y GitHub va a dejar de recibir
+disparos. **Nada se rompe de forma visible**: la página sigue publicando y el
+`schedule` sigue midiendo una vez por hora, así que la única señal es que el
+conteo diario de controles cae de unos 90 a unos 20. Conviene renovarlo antes de
+esa fecha y actualizar acá la nueva.
 
 ## Desarrollo
 
