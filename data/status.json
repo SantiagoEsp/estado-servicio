@@ -1,6 +1,6 @@
 {
   "overall": "operational",
-  "checkedAt": "2026-08-08T06:00:56.538Z",
+  "checkedAt": "2026-08-08T06:07:10.366Z",
   "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
@@ -143,7 +143,7 @@
       },
       {
         "date": "2026-08-08",
-        "checks": 29,
+        "checks": 30,
         "failed": {
           "public_site": 7,
           "merchant_panel": 7,
