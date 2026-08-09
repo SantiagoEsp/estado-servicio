@@ -1,6 +1,14 @@
 {
   "incidents": [
     {
+      "id": "automatic-20260809220102",
+      "title": "Interrupción del servicio",
+      "message": "La plataforma no está respondiendo correctamente.",
+      "lastHealthyAt": "2026-08-09T21:45:26.572Z",
+      "startedAt": "2026-08-09T22:01:02.459Z",
+      "resolvedAt": null
+    },
+    {
       "id": "automatic-20260809194529",
       "title": "Interrupción del servicio",
       "message": "El funcionamiento normal fue restablecido.",
