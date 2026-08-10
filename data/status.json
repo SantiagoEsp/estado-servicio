@@ -1,6 +1,6 @@
 {
   "overall": "major_outage",
-  "checkedAt": "2026-08-10T19:30:50.802Z",
+  "checkedAt": "2026-08-10T19:42:54.827Z",
   "message": "La plataforma no está respondiendo correctamente.",
   "components": [
     {
@@ -165,12 +165,12 @@
       },
       {
         "date": "2026-08-10",
-        "checks": 94,
+        "checks": 95,
         "failed": {
-          "public_site": 14,
-          "merchant_panel": 14,
-          "catalogs_orders": 14,
-          "notifications": 14
+          "public_site": 15,
+          "merchant_panel": 15,
+          "catalogs_orders": 15,
+          "notifications": 15
         },
         "overall": "degraded"
       }
