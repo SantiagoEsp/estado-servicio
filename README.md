@@ -48,7 +48,7 @@ Por eso el disparo real viene de afuera, de una tarea en **cron-job.org** que
 cada quince minutos llama a:
 
 ```
-POST https://api.github.com/repos/SantiagoEsp/estado-servicio/actions/workflows/check-status.yml/dispatches
+POST https://api.github.com/repos/Sinergius-coop-ar/estado-servicio/actions/workflows/check-status.yml/dispatches
 Authorization: Bearer <token>
 Accept: application/vnd.github+json
 Content-Type: application/json
