@@ -1,9 +1,3 @@
-import {
-  applyLiveHealth,
-  loadLiveHealth,
-  unavailableLiveStatus,
-} from "./live-status.js";
-
 const STATUS_LABELS = {
   operational: "Operativo",
   degraded: "Rendimiento degradado",
@@ -311,28 +305,16 @@ async function render() {
   const lastUpdated = document.querySelector("#last-updated");
 
   try {
-    const [storedStatusData, incidentsData] = await Promise.all([
+    const [statusData, incidentsData] = await Promise.all([
       loadJson("./data/status.json"),
       loadJson("./data/incidents.json"),
     ]);
-    let liveConfirmed = true;
-    let statusData;
-
-    try {
-      const liveHealth = await loadLiveHealth();
-      statusData = applyLiveHealth(storedStatusData, liveHealth);
-    } catch {
-      liveConfirmed = false;
-      statusData = unavailableLiveStatus(storedStatusData);
-    }
 
     const overall = safeStatus(statusData.overall);
     document.body.dataset.overall = overall;
     title.textContent = OVERALL_TITLES[overall];
     message.textContent = statusData.message;
-    lastUpdated.textContent = liveConfirmed
-      ? `Comprobado: ${formatDate(statusData.checkedAt)}`
-      : `Último intento: ${formatDate(statusData.checkedAt)}`;
+    lastUpdated.textContent = `Comprobado: ${formatDate(statusData.checkedAt)}`;
 
     componentsContainer.replaceChildren();
     const line = document.createElement("div");
@@ -374,4 +356,3 @@ document.addEventListener("visibilitychange", () => {
     void render();
   }
 });
-

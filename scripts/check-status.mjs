@@ -9,15 +9,21 @@ const USER_AGENT = "EstadoServicio/1.0 (+https://estado.sanezeit.com)";
 export const TARGETS = [
   {
     id: "public_site",
-    url: "https://app.sanezeit.com/",
+    url: "https://sinergius.coop.ar/",
     acceptedStatuses: [200],
-    expectedText: "<html",
+    expectedText: "Sinergius",
   },
   {
-    id: "merchant_panel",
-    url: "https://app.sanezeit.com/login",
+    id: "meeting_api",
+    url: "https://sinergius.coop.ar/api/send-meeting.php",
+    acceptedStatuses: [405],
+    expectedText: '"code":"method_not_allowed"',
+  },
+  {
+    id: "alternate_domain",
+    url: "https://sinergius.com.ar/",
     acceptedStatuses: [200],
-    expectedText: "<html",
+    expectedText: "Sinergius",
   },
 ];
 
@@ -110,15 +116,7 @@ function componentStatus(componentId, results, overall) {
     return directResult.ok ? "operational" : "major_outage";
   }
 
-  if (componentId === "catalogs_orders") {
-    return overall;
-  }
-
-  if (componentId === "notifications" && overall === "major_outage") {
-    return "major_outage";
-  }
-
-  return "operational";
+  return overall;
 }
 
 export function updateStatusDocument(currentStatus, results, checkedAt) {
