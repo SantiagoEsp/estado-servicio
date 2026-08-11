@@ -6,6 +6,7 @@ import {
   dayStatusFromCounts,
   hasNetworkAccess,
   overallFromResults,
+  TARGETS,
   updateDailyHistory,
   updateIncidentsDocument,
   updateStatusDocument,
@@ -17,31 +18,45 @@ const baseStatus = {
   message: "Todo bien.",
   components: [
     { id: "public_site", name: "Sitio", description: "", status: "operational" },
-    { id: "merchant_panel", name: "Panel", description: "", status: "operational" },
-    { id: "catalogs_orders", name: "Pedidos", description: "", status: "operational" },
-    { id: "notifications", name: "Avisos", description: "", status: "operational" },
+    { id: "meeting_api", name: "Reuniones", description: "", status: "operational" },
+    { id: "alternate_domain", name: "Dominio alternativo", description: "", status: "operational" },
   ],
 };
+
+test("controla únicamente superficies públicas de Sinergius", () => {
+  assert.deepEqual(
+    TARGETS.map((target) => target.id),
+    ["public_site", "meeting_api", "alternate_domain"],
+  );
+  assert.deepEqual(
+    new Set(TARGETS.map((target) => new URL(target.url).hostname)),
+    new Set(["sinergius.coop.ar", "sinergius.com.ar"]),
+  );
+  assert.ok(TARGETS.every((target) => !target.url.includes("app.sanezeit.com")));
+});
 
 test("clasifica el estado general según los controles", () => {
   assert.equal(
     overallFromResults([
       { id: "public_site", ok: true },
-      { id: "merchant_panel", ok: true },
+      { id: "meeting_api", ok: true },
+      { id: "alternate_domain", ok: true },
     ]),
     "operational",
   );
   assert.equal(
     overallFromResults([
       { id: "public_site", ok: true },
-      { id: "merchant_panel", ok: false },
+      { id: "meeting_api", ok: false },
+      { id: "alternate_domain", ok: true },
     ]),
     "partial_outage",
   );
   assert.equal(
     overallFromResults([
       { id: "public_site", ok: false },
-      { id: "merchant_panel", ok: false },
+      { id: "meeting_api", ok: false },
+      { id: "alternate_domain", ok: false },
     ]),
     "major_outage",
   );
@@ -52,7 +67,8 @@ test("actualiza componentes sin publicar diagnósticos internos", () => {
     baseStatus,
     [
       { id: "public_site", ok: true, httpStatus: 200 },
-      { id: "merchant_panel", ok: false, httpStatus: 503 },
+      { id: "meeting_api", ok: false, httpStatus: 503 },
+      { id: "alternate_domain", ok: true, httpStatus: 200 },
     ],
     "2026-07-29T21:00:00.000Z",
   );
@@ -60,7 +76,7 @@ test("actualiza componentes sin publicar diagnósticos internos", () => {
   assert.equal(next.overall, "partial_outage");
   assert.equal(next.components[0].status, "operational");
   assert.equal(next.components[1].status, "major_outage");
-  assert.equal(next.components[2].status, "partial_outage");
+  assert.equal(next.components[2].status, "operational");
   assert.equal(JSON.stringify(next).includes("503"), false);
 });
 
@@ -70,7 +86,8 @@ test("renueva la hora en cada control aunque todo siga operativo", () => {
     baseStatus,
     [
       { id: "public_site", ok: true, httpStatus: 200 },
-      { id: "merchant_panel", ok: true, httpStatus: 200 },
+      { id: "meeting_api", ok: true, httpStatus: 405 },
+      { id: "alternate_domain", ok: true, httpStatus: 200 },
     ],
     checkedAt,
   );
@@ -227,4 +244,3 @@ test("valida código y contenido con un fetch reemplazable", async () => {
 
   assert.deepEqual(result, { id: "web", ok: true, httpStatus: 200 });
 });
-

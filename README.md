@@ -1,21 +1,33 @@
-# Estado del servicio
+# Estado de Sinergius
 
-Página pública y neutral para comunicar la disponibilidad de la plataforma.
+Página pública y neutral para comunicar la disponibilidad de Sinergius.
 Está alojada fuera de la VPS productiva para que permanezca visible durante una
 interrupción del servidor.
 
 ## Controles
 
-El workflow `Verificar servicios` consulta la página pública y el acceso al
-panel, reintenta antes de declarar una falla, actualiza los componentes
+El workflow `Verificar servicios` consulta la web institucional, el endpoint
+no destructivo del formulario de reuniones y el dominio alternativo. Reintenta
+antes de declarar una falla, actualiza los componentes
 afectados y abre o resuelve automáticamente el incidente público. Cada control
 publica la hora confirmada y despliega el JSON actualizado en GitHub Pages.
-La página vuelve a consultar el estado cada minuto y también cuando el usuario
-regresa a una pestaña que había quedado abierta.
+La página vuelve a consultar el estado publicado cada minuto y también cuando
+el usuario regresa a una pestaña que había quedado abierta.
 
 Cada componente muestra un gráfico compacto de los últimos 90 días. El historial
 empieza con la primera medición real: los días anteriores se ven como no medidos
 y no se completan con disponibilidad ficticia.
+
+### Separación respecto de Delivery
+
+Hasta el 11 de agosto de 2026 este repositorio controlaba `app.sanezeit.com`,
+que corresponde a Delivery y no forma parte de Sinergius. El último estado y
+todo el código anterior quedaron preservados en la etiqueta Git
+`delivery-status-final-2026-08-11`. Esa etiqueta es el punto de partida para
+crear más adelante el monitor independiente de Delivery.
+
+El historial público de Sinergius comienza con la migración; no se mezclan
+estadísticas ni incidentes de ambos productos.
 
 ### Una falla del control no es una caída del servicio
 
@@ -24,11 +36,6 @@ salida a internet, no puede consultar nada, y eso no dice nada sobre la
 plataforma. Por eso, antes de publicar una caída se consulta un destino externo
 ajeno al proyecto: si tampoco responde, el resultado se descarta y el estado
 queda como estaba.
-
-Hasta el 7 de agosto de 2026 no existía esa comprobación y se publicaron 24
-interrupciones que nunca ocurrieron. Los registros de acceso del servidor
-mostraron que en esos momentos no llegó ninguna consulta del control y que el
-sitio respondía con normalidad. Quedaron marcadas como falsa alarma.
 
 ### El resumen diario cuenta controles
 
@@ -102,4 +109,6 @@ internos.
 ## Publicación
 
 `Publicar página de estado` valida y despliega el sitio mediante GitHub Pages.
-El dominio temporal previsto es `estado.sanezeit.com`.
+Mientras el producto no tenga nombre y dominio definitivos, la publicación usa
+temporalmente `estado.sanezeit.com`. El cambio futuro de dominio no requiere
+alterar el monitor ni su historial.

@@ -1,189 +1,39 @@
 {
   "overall": "operational",
-  "checkedAt": "2026-08-11T13:45:32.457Z",
+  "checkedAt": "2026-08-11T13:49:08.357Z",
   "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
       "id": "public_site",
-      "name": "Sitio público",
-      "description": "Inicio y acceso general a la plataforma.",
+      "name": "Sitio institucional",
+      "description": "Portada pública y acceso general a Sinergius.",
       "status": "operational"
     },
     {
-      "id": "merchant_panel",
-      "name": "Panel de comercios",
-      "description": "Ingreso y herramientas de gestión.",
+      "id": "meeting_api",
+      "name": "Solicitudes de reunión",
+      "description": "Disponibilidad técnica del canal de contacto, sin enviar formularios.",
       "status": "operational"
     },
     {
-      "id": "catalogs_orders",
-      "name": "Catálogos y pedidos",
-      "description": "Publicación de catálogos y recepción de pedidos.",
-      "status": "operational"
-    },
-    {
-      "id": "notifications",
-      "name": "Notificaciones",
-      "description": "Avisos operativos enviados por la plataforma.",
+      "id": "alternate_domain",
+      "name": "Dominio alternativo",
+      "description": "Redirección segura desde sinergius.com.ar al sitio principal.",
       "status": "operational"
     }
   ],
   "history": {
-    "startedAt": "2026-07-29",
+    "startedAt": "2026-08-11",
     "days": [
       {
-        "date": "2026-07-29",
+        "date": "2026-08-11",
         "checks": 1,
         "failed": {
           "public_site": 0,
-          "merchant_panel": 0,
-          "catalogs_orders": 0,
-          "notifications": 0
+          "meeting_api": 0,
+          "alternate_domain": 0
         },
         "overall": "operational"
-      },
-      {
-        "date": "2026-07-30",
-        "checks": 34,
-        "failed": {
-          "public_site": 6,
-          "merchant_panel": 6,
-          "catalogs_orders": 6,
-          "notifications": 6
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-07-31",
-        "checks": 31,
-        "failed": {
-          "public_site": 5,
-          "merchant_panel": 5,
-          "catalogs_orders": 5,
-          "notifications": 5
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-01",
-        "checks": 37,
-        "failed": {
-          "public_site": 1,
-          "merchant_panel": 1,
-          "catalogs_orders": 1,
-          "notifications": 1
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-02",
-        "checks": 37,
-        "failed": {
-          "public_site": 6,
-          "merchant_panel": 6,
-          "catalogs_orders": 6,
-          "notifications": 6
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-03",
-        "checks": 27,
-        "failed": {
-          "public_site": 4,
-          "merchant_panel": 4,
-          "catalogs_orders": 4,
-          "notifications": 4
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-04",
-        "checks": 26,
-        "failed": {
-          "public_site": 5,
-          "merchant_panel": 5,
-          "catalogs_orders": 5,
-          "notifications": 5
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-05",
-        "checks": 12,
-        "failed": {
-          "public_site": 1,
-          "merchant_panel": 1,
-          "catalogs_orders": 1,
-          "notifications": 1
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-06",
-        "checks": 6,
-        "failed": {
-          "public_site": 1,
-          "merchant_panel": 1,
-          "catalogs_orders": 1,
-          "notifications": 1
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-07",
-        "checks": 42,
-        "failed": {
-          "public_site": 2,
-          "merchant_panel": 2,
-          "catalogs_orders": 2,
-          "notifications": 2
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-08",
-        "checks": 128,
-        "failed": {
-          "public_site": 20,
-          "merchant_panel": 20,
-          "catalogs_orders": 20,
-          "notifications": 20
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-09",
-        "checks": 125,
-        "failed": {
-          "public_site": 22,
-          "merchant_panel": 22,
-          "catalogs_orders": 22,
-          "notifications": 22
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-10",
-        "checks": 117,
-        "failed": {
-          "public_site": 18,
-          "merchant_panel": 18,
-          "catalogs_orders": 18,
-          "notifications": 18
-        },
-        "overall": "degraded"
-      },
-      {
-        "date": "2026-08-11",
-        "checks": 67,
-        "failed": {
-          "public_site": 4,
-          "merchant_panel": 4,
-          "catalogs_orders": 4,
-          "notifications": 4
-        },
-        "overall": "degraded"
       }
     ]
   }
