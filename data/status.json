@@ -1,6 +1,6 @@
 {
   "overall": "operational",
-  "checkedAt": "2026-08-12T04:15:30.165Z",
+  "checkedAt": "2026-08-12T04:28:05.104Z",
   "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
@@ -37,7 +37,7 @@
       },
       {
         "date": "2026-08-12",
-        "checks": 20,
+        "checks": 21,
         "failed": {
           "public_site": 2,
           "meeting_api": 2,
