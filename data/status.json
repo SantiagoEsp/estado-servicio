@@ -1,25 +1,25 @@
 {
-  "overall": "operational",
-  "checkedAt": "2026-08-13T02:30:45.950Z",
-  "message": "No detectamos problemas en los servicios controlados.",
+  "overall": "major_outage",
+  "checkedAt": "2026-08-13T02:45:29.919Z",
+  "message": "La plataforma no está respondiendo correctamente.",
   "components": [
     {
       "id": "public_site",
       "name": "Sitio institucional",
       "description": "Portada pública y acceso general a Sinergius.",
-      "status": "operational"
+      "status": "major_outage"
     },
     {
       "id": "meeting_api",
       "name": "Solicitudes de reunión",
       "description": "Disponibilidad técnica del canal de contacto, sin enviar formularios.",
-      "status": "operational"
+      "status": "major_outage"
     },
     {
       "id": "alternate_domain",
       "name": "Dominio alternativo",
       "description": "Redirección segura desde sinergius.com.ar al sitio principal.",
-      "status": "operational"
+      "status": "major_outage"
     }
   ],
   "history": {
@@ -47,11 +47,11 @@
       },
       {
         "date": "2026-08-13",
-        "checks": 12,
+        "checks": 13,
         "failed": {
-          "public_site": 3,
-          "meeting_api": 3,
-          "alternate_domain": 3
+          "public_site": 4,
+          "meeting_api": 4,
+          "alternate_domain": 4
         },
         "overall": "partial_outage"
       }
