@@ -4,9 +4,17 @@ import { pathToFileURL } from "node:url";
 const STATUS_PATH = new URL("../data/status.json", import.meta.url);
 const INCIDENTS_PATH = new URL("../data/incidents.json", import.meta.url);
 const MAX_HISTORY_DAYS = 90;
-const USER_AGENT = "EstadoServicio/1.0 (+https://estado.sanezeit.com)";
+const MAX_RESPONSE_BYTES = 256 * 1024;
+const HEARTBEAT_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const USER_AGENT = "EstadoServicio/1.0 (+https://estado.sinergius.coop.ar)";
 
 export const TARGETS = [
+  {
+    id: "status_page",
+    url: "https://estado.sinergius.coop.ar/",
+    acceptedStatuses: [200],
+    expectedText: "Estado de los servicios",
+  },
   {
     id: "public_site",
     url: "https://sinergius.coop.ar/",
@@ -15,9 +23,10 @@ export const TARGETS = [
   },
   {
     id: "meeting_api",
-    url: "https://sinergius.coop.ar/api/send-meeting.php",
-    acceptedStatuses: [405],
-    expectedText: '"code":"method_not_allowed"',
+    url: "https://sinergius.coop.ar/api/meeting-health.php",
+    acceptedStatuses: [204],
+    expectedText: "",
+    requiredEnv: "MEETING_HEALTH_TOKEN",
   },
   {
     id: "alternate_domain",
@@ -47,17 +56,56 @@ function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export async function checkTarget(target, fetchImplementation = fetch) {
+async function readBodyWithLimit(response, maxBytes = MAX_RESPONSE_BYTES) {
+  const declaredLength = Number(response.headers?.get?.("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+    throw new Error("respuesta demasiado grande");
+  }
+
+  if (!response.body?.getReader) {
+    const body = await response.text();
+    if (Buffer.byteLength(body, "utf8") > maxBytes) {
+      throw new Error("respuesta demasiado grande");
+    }
+    return body;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let bytes = 0;
+  let body = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    if (bytes > maxBytes) {
+      await reader.cancel("respuesta demasiado grande");
+      throw new Error("respuesta demasiado grande");
+    }
+    body += decoder.decode(value, { stream: true });
+  }
+  return body + decoder.decode();
+}
+
+export async function checkTarget(target, fetchImplementation = fetch, delayImplementation = delay) {
   let lastResult = { ok: false, httpStatus: null };
+
+  const healthToken = target.requiredEnv ? process.env[target.requiredEnv] : null;
+  if (target.requiredEnv && (!healthToken || healthToken.length < 32)) {
+    return { id: target.id, ...lastResult };
+  }
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       const response = await fetchImplementation(target.url, {
-        headers: { "User-Agent": USER_AGENT },
+        headers: {
+          "User-Agent": USER_AGENT,
+          ...(healthToken ? { Authorization: `Bearer ${healthToken}` } : {}),
+        },
         redirect: "follow",
         signal: AbortSignal.timeout(20_000),
       });
-      const body = await response.text();
+      const body = await readBodyWithLimit(response);
       const accepted = target.acceptedStatuses.includes(response.status);
       const contentMatches = body.toLowerCase().includes(target.expectedText.toLowerCase());
       lastResult = {
@@ -74,7 +122,7 @@ export async function checkTarget(target, fetchImplementation = fetch) {
 
     // Un corte de red suele durar más que unos segundos: espaciar los
     // reintentos evita confundirlo con un servicio caído.
-    await delay(10_000);
+    await delayImplementation(10_000);
   }
 
   return { id: target.id, ...lastResult };
@@ -119,7 +167,7 @@ function componentStatus(componentId, results, overall) {
   return overall;
 }
 
-export function updateStatusDocument(currentStatus, results, checkedAt) {
+export function updateStatusDocument(currentStatus, results, checkedAt, updateHistory = true) {
   const overall = overallFromResults(results);
 
   const nextStatus = {
@@ -135,7 +183,9 @@ export function updateStatusDocument(currentStatus, results, checkedAt) {
 
   return {
     ...nextStatus,
-    history: updateDailyHistory(currentStatus.history, nextStatus, checkedAt),
+    history: updateHistory
+      ? updateDailyHistory(currentStatus.history, nextStatus, checkedAt)
+      : currentStatus.history,
   };
 }
 
@@ -158,9 +208,8 @@ export function dayStatusFromCounts(checks, failedCount) {
   return ratio < 0.6 ? "partial_outage" : "major_outage";
 }
 
-function dayOverall(checks, failed) {
-  const values = Object.values(failed);
-  return dayStatusFromCounts(checks, values.length ? Math.max(...values) : 0);
+function dayOverall(checks, failedChecks) {
+  return dayStatusFromCounts(checks, failedChecks);
 }
 
 export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
@@ -172,6 +221,10 @@ export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
 
   const checks = (existing?.checks ?? 0) + 1;
   const failed = { ...(existing?.failed ?? {}) };
+  const legacyFailures = Object.values(failed);
+  const previousFailedChecks = existing?.failedChecks
+    ?? (legacyFailures.length ? Math.max(...legacyFailures) : 0);
+  const failedChecks = previousFailedChecks + (nextStatus.overall === "operational" ? 0 : 1);
 
   for (const component of nextStatus.components) {
     const previousFailures = failed[component.id] ?? 0;
@@ -179,7 +232,13 @@ export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
       previousFailures + (component.status === "operational" ? 0 : 1);
   }
 
-  const nextDay = { date, checks, failed, overall: dayOverall(checks, failed) };
+  const nextDay = {
+    date,
+    checks,
+    failed,
+    failedChecks,
+    overall: dayOverall(checks, failedChecks),
+  };
 
   if (existingIndex === -1) {
     days.push(nextDay);
@@ -193,6 +252,21 @@ export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
       .filter((day) => Date.parse(`${day.date}T00:00:00Z`) >= Date.parse(checkedAt) - 89 * 86400000)
       .sort((first, second) => first.date.localeCompare(second.date)),
   };
+}
+
+export function shouldPersistStatus(currentStatus, nextStatus, checkedAt) {
+  const previousComponents = Object.fromEntries(
+    currentStatus.components.map(({ id, status }) => [id, status]),
+  );
+  const nextComponents = Object.fromEntries(
+    nextStatus.components.map(({ id, status }) => [id, status]),
+  );
+  const stateChanged = currentStatus.overall !== nextStatus.overall
+    || JSON.stringify(previousComponents) !== JSON.stringify(nextComponents);
+  const lastPersistedAt = Date.parse(currentStatus.checkedAt ?? "");
+  const heartbeatDue = !Number.isFinite(lastPersistedAt)
+    || Date.parse(checkedAt) - lastPersistedAt >= HEARTBEAT_INTERVAL_MS;
+  return stateChanged || heartbeatDue;
 }
 
 function incidentTitle(status) {
@@ -268,7 +342,11 @@ async function main() {
     return;
   }
 
-  const nextStatus = updateStatusDocument(currentStatus, results, checkedAt);
+  const candidateStatus = updateStatusDocument(currentStatus, results, checkedAt, false);
+  const persistRecommended = shouldPersistStatus(currentStatus, candidateStatus, checkedAt);
+  const nextStatus = persistRecommended
+    ? updateStatusDocument(currentStatus, results, checkedAt, true)
+    : candidateStatus;
   const nextIncidents = updateIncidentsDocument(
     currentIncidents,
     currentStatus.overall,
@@ -287,6 +365,7 @@ async function main() {
       overall: nextStatus.overall,
       checkedAt,
       persisted: true,
+      persistRecommended,
       results,
     })}\n`,
   );

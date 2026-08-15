@@ -4,6 +4,12 @@
   "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
+      "id": "status_page",
+      "name": "Página de estado",
+      "description": "Disponibilidad del panel público de estado.",
+      "status": "operational"
+    },
+    {
       "id": "public_site",
       "name": "Sitio institucional",
       "description": "Portada pública y acceso general a Sinergius.",
@@ -33,6 +39,7 @@
           "meeting_api": 10,
           "alternate_domain": 10
         },
+        "failedChecks": 10,
         "overall": "partial_outage"
       },
       {
@@ -43,6 +50,7 @@
           "meeting_api": 6,
           "alternate_domain": 6
         },
+        "failedChecks": 6,
         "overall": "degraded"
       },
       {
@@ -53,6 +61,7 @@
           "meeting_api": 36,
           "alternate_domain": 39
         },
+        "failedChecks": 39,
         "overall": "partial_outage"
       },
       {
@@ -63,6 +72,7 @@
           "meeting_api": 0,
           "alternate_domain": 6
         },
+        "failedChecks": 6,
         "overall": "degraded"
       },
       {
@@ -73,6 +83,7 @@
           "meeting_api": 0,
           "alternate_domain": 0
         },
+        "failedChecks": 0,
         "overall": "operational"
       }
     ]
