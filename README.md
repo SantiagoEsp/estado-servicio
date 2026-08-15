@@ -108,7 +108,11 @@ internos.
 
 ## Publicación
 
-`Publicar página de estado` valida y despliega el sitio mediante GitHub Pages.
-Mientras el producto no tenga nombre y dominio definitivos, la publicación usa
-temporalmente `estado.sanezeit.com`. El cambio futuro de dominio no requiere
-alterar el monitor ni su historial.
+`Publicar página de estado` valida y despliega el sitio mediante GitHub Pages en
+`estado.sinergius.coop.ar`. El workflow programado publica una lectura fresca
+en cada ejecución, pero sólo conserva en Git cambios de estado y un heartbeat
+cada seis horas; así mantiene trazabilidad sin crear un commit cada 15 minutos.
+
+GitHub Pages debe tener `estado.sinergius.coop.ar` como dominio personalizado y
+DNS debe publicar un CNAME explícito hacia `sinergius-coop-ar.github.io`. El
+wildcard general de la VPS no reemplaza ese registro.

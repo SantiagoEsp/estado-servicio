@@ -6,6 +6,7 @@ import {
   dayStatusFromCounts,
   hasNetworkAccess,
   overallFromResults,
+  shouldPersistStatus,
   TARGETS,
   updateDailyHistory,
   updateIncidentsDocument,
@@ -17,6 +18,7 @@ const baseStatus = {
   checkedAt: "2026-07-29T20:00:00.000Z",
   message: "Todo bien.",
   components: [
+    { id: "status_page", name: "Estado", description: "", status: "operational" },
     { id: "public_site", name: "Sitio", description: "", status: "operational" },
     { id: "meeting_api", name: "Reuniones", description: "", status: "operational" },
     { id: "alternate_domain", name: "Dominio alternativo", description: "", status: "operational" },
@@ -26,13 +28,21 @@ const baseStatus = {
 test("controla únicamente superficies públicas de Sinergius", () => {
   assert.deepEqual(
     TARGETS.map((target) => target.id),
-    ["public_site", "meeting_api", "alternate_domain"],
+    ["status_page", "public_site", "meeting_api", "alternate_domain"],
   );
   assert.deepEqual(
     new Set(TARGETS.map((target) => new URL(target.url).hostname)),
-    new Set(["sinergius.coop.ar", "sinergius.com.ar"]),
+    new Set(["estado.sinergius.coop.ar", "sinergius.coop.ar", "sinergius.com.ar"]),
   );
-  assert.ok(TARGETS.every((target) => !target.url.includes("app.sanezeit.com")));
+  assert.ok(
+    TARGETS.every((target) => new URL(target.url).hostname !== "app.sanezeit.com"),
+  );
+});
+
+test("el control SMTP requiere un token fuera del repositorio", () => {
+  const meeting = TARGETS.find(({ id }) => id === "meeting_api");
+  assert.equal(meeting.requiredEnv, "MEETING_HEALTH_TOKEN");
+  assert.equal(JSON.stringify(meeting).includes("Bearer"), false);
 });
 
 test("clasifica el estado general según los controles", () => {
@@ -41,6 +51,7 @@ test("clasifica el estado general según los controles", () => {
       { id: "public_site", ok: true },
       { id: "meeting_api", ok: true },
       { id: "alternate_domain", ok: true },
+      { id: "status_page", ok: true },
     ]),
     "operational",
   );
@@ -49,6 +60,7 @@ test("clasifica el estado general según los controles", () => {
       { id: "public_site", ok: true },
       { id: "meeting_api", ok: false },
       { id: "alternate_domain", ok: true },
+      { id: "status_page", ok: true },
     ]),
     "partial_outage",
   );
@@ -57,6 +69,7 @@ test("clasifica el estado general según los controles", () => {
       { id: "public_site", ok: false },
       { id: "meeting_api", ok: false },
       { id: "alternate_domain", ok: false },
+      { id: "status_page", ok: false },
     ]),
     "major_outage",
   );
@@ -74,9 +87,9 @@ test("actualiza componentes sin publicar diagnósticos internos", () => {
   );
 
   assert.equal(next.overall, "partial_outage");
-  assert.equal(next.components[0].status, "operational");
-  assert.equal(next.components[1].status, "major_outage");
-  assert.equal(next.components[2].status, "operational");
+  assert.equal(next.components.find(({ id }) => id === "public_site").status, "operational");
+  assert.equal(next.components.find(({ id }) => id === "meeting_api").status, "major_outage");
+  assert.equal(next.components.find(({ id }) => id === "alternate_domain").status, "operational");
   assert.equal(JSON.stringify(next).includes("503"), false);
 });
 
@@ -186,6 +199,53 @@ test("marca caída total el día en que la mayoría de los controles falla", () 
   assert.equal(history.days[0].checks, 10);
   assert.equal(history.days[0].failed.public_site, 9);
   assert.equal(history.days[0].overall, "major_outage");
+});
+
+test("cuenta controles fallidos aunque fallen componentes distintos", () => {
+  let history;
+  for (let index = 0; index < 3; index += 1) {
+    const components = baseStatus.components.map((component, componentIndex) => ({
+      ...component,
+      status: componentIndex === index ? "major_outage" : "operational",
+    }));
+    history = updateDailyHistory(
+      history,
+      { overall: "partial_outage", components },
+      `2026-07-29T0${index + 1}:00:00.000Z`,
+    );
+  }
+
+  assert.equal(history.days[0].failedChecks, 3);
+  assert.equal(history.days[0].overall, "major_outage");
+});
+
+test("persiste sólo cambios y heartbeat de seis horas", () => {
+  const same = { ...baseStatus, checkedAt: "2026-07-29T20:00:00.000Z" };
+  assert.equal(shouldPersistStatus(baseStatus, same, "2026-07-29T21:00:00.000Z"), false);
+  assert.equal(shouldPersistStatus(baseStatus, same, "2026-07-30T02:00:00.000Z"), true);
+
+  const changed = {
+    ...same,
+    overall: "partial_outage",
+    components: same.components.map((component, index) => ({
+      ...component,
+      status: index === 0 ? "major_outage" : component.status,
+    })),
+  };
+  assert.equal(shouldPersistStatus(baseStatus, changed, "2026-07-29T21:00:00.000Z"), true);
+});
+
+test("rechaza respuestas mayores al límite sin leerlas completas", async () => {
+  const result = await checkTarget(
+    { id: "grande", url: "https://example.test", acceptedStatuses: [200], expectedText: "ok" },
+    async () => ({
+      status: 200,
+      headers: { get: () => String(300 * 1024) },
+      text: async () => "ok",
+    }),
+    async () => {},
+  );
+  assert.equal(result.ok, false);
 });
 
 test("clasifica el día según la proporción de controles fallidos", () => {

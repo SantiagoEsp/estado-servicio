@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - data/status.json
+      - data/incidents.json
   workflow_dispatch:
 
 permissions:
@@ -33,7 +36,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p _site
-          cp index.html robots.txt .nojekyll _site/
+          cp index.html robots.txt .nojekyll CNAME _site/
           cp -R assets data _site/
 
       - name: Subir artefacto
