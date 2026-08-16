@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
   checkTarget,
@@ -132,6 +133,50 @@ test("abre y resuelve un incidente automático", () => {
 
   assert.equal(resolved.incidents[0].resolvedAt, resolvedAt);
   assert.match(resolved.incidents[0].message, /restablecido/i);
+});
+
+test("conserva un único incidente durante controles fallidos consecutivos", () => {
+  const firstCheck = "2026-07-29T21:00:00.000Z";
+  const secondCheck = "2026-07-29T21:15:00.000Z";
+  const opened = updateIncidentsDocument(
+    { incidents: [] },
+    "operational",
+    "partial_outage",
+    firstCheck,
+    "2026-07-29T20:45:00.000Z",
+  );
+  const continued = updateIncidentsDocument(
+    opened,
+    "partial_outage",
+    "partial_outage",
+    secondCheck,
+  );
+
+  assert.equal(continued.incidents.length, 1);
+  assert.equal(continued.incidents[0].id, opened.incidents[0].id);
+  assert.equal(continued.incidents[0].startedAt, firstCheck);
+  assert.equal(continued.incidents[0].resolvedAt, null);
+});
+
+test("el workflow separa despliegue y persistencia sin abrir main", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/check-status.yml", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(workflow, /refs\/heads\/status-data:refs\/remotes\/origin\/status-data/);
+  assert.match(workflow, /ref: status-data/);
+  assert.match(workflow, /git add -- data\/status\.json data\/incidents\.json/);
+  assert.match(workflow, /git push origin HEAD:status-data/);
+  assert.equal(workflow.match(/git push/g)?.length, 1);
+  assert.doesNotMatch(workflow, /git push(?:\s+origin)?(?:\s+HEAD)?:?main/);
+
+  const deployBlock = workflow.slice(workflow.indexOf("  deploy:"));
+  assert.match(deployBlock, /needs: check/);
+  assert.doesNotMatch(deployBlock, /needs:\s*(?:\[[^\]]*persist|persist)/);
+  assert.match(workflow, /test "\$\(find "\$\{RUNNER_TEMP\}\/monitor-state" -type f \| wc -l\)" -eq 2/);
+  assert.match(workflow, /\$2 != "data\/incidents\.json" && \$2 != "data\/status\.json"/);
+  assert.match(workflow, /git diff --quiet -- data\/status\.json data\/incidents\.json/);
 });
 
 test("registra disponibilidad diaria sin inventar días anteriores", () => {

@@ -113,6 +113,14 @@ internos.
 en cada ejecución, pero sólo conserva en Git cambios de estado y un heartbeat
 cada seis horas; así mantiene trazabilidad sin crear un commit cada 15 minutos.
 
+El código y los workflows permanecen en `main`, con sus controles obligatorios.
+Los dos JSON mutables se conservan en la rama `status-data`, que no es fuente de
+código ni de GitHub Pages. El despliegue depende de la medición, no del commit de
+persistencia: si GitHub rechazara temporalmente ese commit, la lectura fresca se
+publica igual y la corrida queda roja para que el fallo de continuidad sea
+visible. El procedimiento de operación y rollback está en
+[`docs/status-data-runbook.md`](./docs/status-data-runbook.md).
+
 GitHub Pages debe tener `estado.sinergius.coop.ar` como dominio personalizado y
 DNS debe publicar un CNAME explícito hacia `sinergius-coop-ar.github.io`. El
 wildcard general de la VPS no reemplaza ese registro.

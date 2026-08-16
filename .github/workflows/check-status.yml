@@ -12,8 +12,10 @@ concurrency:
 
 jobs:
   check:
+    outputs:
+      persist: ${{ steps.monitor.outputs.persist }}
     permissions:
-      contents: write
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
@@ -26,6 +28,15 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
+
+      - name: Recuperar el último estado persistido
+        shell: bash
+        run: |
+          git fetch --no-tags --depth=1 origin \
+            refs/heads/status-data:refs/remotes/origin/status-data
+          git show refs/remotes/origin/status-data:data/status.json > data/status.json
+          git show refs/remotes/origin/status-data:data/incidents.json > data/incidents.json
+          node -e "JSON.parse(require('fs').readFileSync('data/status.json', 'utf8')); JSON.parse(require('fs').readFileSync('data/incidents.json', 'utf8'))"
 
       - name: Ejecutar pruebas
         run: npm run check
@@ -52,16 +63,65 @@ jobs:
         with:
           path: _site
 
-      - name: Publicar cambios de estado
-        if: steps.monitor.outputs.persist == 'true'
+      - name: Preparar estado persistible
         shell: bash
         run: |
+          mkdir -p _state/data
+          cp data/status.json data/incidents.json _state/data/
+
+      - name: Subir estado persistible
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: monitor-state
+          path: _state
+          if-no-files-found: error
+          retention-days: 2
+
+  persist:
+    if: needs.check.outputs.persist == 'true'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: check
+    steps:
+      - name: Descargar rama de estado
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: status-data
+          fetch-depth: 1
+
+      - name: Descargar estado medido
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: monitor-state
+          path: ${{ runner.temp }}/monitor-state
+
+      - name: Persistir exclusivamente los JSON públicos
+        shell: bash
+        run: |
+          test -f "${RUNNER_TEMP}/monitor-state/data/status.json"
+          test -f "${RUNNER_TEMP}/monitor-state/data/incidents.json"
+          test "$(find "${RUNNER_TEMP}/monitor-state" -type f | wc -l)" -eq 2
+          node -e "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'))" \
+            "${RUNNER_TEMP}/monitor-state/data/status.json" \
+            "${RUNNER_TEMP}/monitor-state/data/incidents.json"
+
+          cp "${RUNNER_TEMP}/monitor-state/data/status.json" data/status.json
+          cp "${RUNNER_TEMP}/monitor-state/data/incidents.json" data/incidents.json
+
+          unexpected="$(git status --porcelain --untracked-files=all | awk '$2 != "data/incidents.json" && $2 != "data/status.json" { print $2 }')"
+          test -z "${unexpected}"
+          if git diff --quiet -- data/status.json data/incidents.json; then
+            echo 'El monitor recomendó persistir, pero los JSON no cambiaron.' >&2
+            exit 1
+          fi
+
           git config user.name "status-monitor[bot]"
           git config user.email "status-monitor[bot]@users.noreply.github.com"
-          git add data/status.json data/incidents.json
+          git add -- data/status.json data/incidents.json
           git commit -m "Actualizar estado del servicio"
-
-          git push
+          git push origin HEAD:status-data
 
   deploy:
     permissions:
