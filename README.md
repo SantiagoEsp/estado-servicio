@@ -110,8 +110,9 @@ internos.
 
 `Publicar página de estado` valida y despliega el sitio mediante GitHub Pages en
 `estado.sinergius.coop.ar`. El workflow programado publica una lectura fresca
-en cada ejecución, pero sólo conserva en Git cambios de estado y un heartbeat
-cada seis horas; así mantiene trazabilidad sin crear un commit cada 15 minutos.
+en cada ejecución y conserva los dos JSON después de cada medición válida. Las
+corridas se serializan para que cada una parta del historial anterior y no se
+pierdan controles ni transiciones de incidentes.
 
 El código y los workflows permanecen en `main`, con sus controles obligatorios.
 Los dos JSON mutables se conservan en la rama `status-data`, que no es fuente de

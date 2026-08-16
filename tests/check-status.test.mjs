@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import {
+  applyMeasurement,
   checkTarget,
   dayStatusFromCounts,
   hasNetworkAccess,
   overallFromResults,
-  shouldPersistStatus,
   TARGETS,
   updateDailyHistory,
   updateIncidentsDocument,
@@ -165,6 +165,8 @@ test("el workflow separa despliegue y persistencia sin abrir main", async () => 
   );
 
   assert.match(workflow, /refs\/heads\/status-data:refs\/remotes\/origin\/status-data/);
+  assert.match(workflow, /concurrency:\s*\n\s*group: service-status-check\s*\n\s*cancel-in-progress: false/);
+  assert.match(workflow, /\.persistRequired \/\/ false/);
   assert.match(workflow, /ref: status-data/);
   assert.match(workflow, /git add -- data\/status\.json data\/incidents\.json/);
   assert.match(workflow, /git push origin HEAD:status-data/);
@@ -264,20 +266,46 @@ test("cuenta controles fallidos aunque fallen componentes distintos", () => {
   assert.equal(history.days[0].overall, "major_outage");
 });
 
-test("persiste sólo cambios y heartbeat de seis horas", () => {
-  const same = { ...baseStatus, checkedAt: "2026-07-29T20:00:00.000Z" };
-  assert.equal(shouldPersistStatus(baseStatus, same, "2026-07-29T21:00:00.000Z"), false);
-  assert.equal(shouldPersistStatus(baseStatus, same, "2026-07-30T02:00:00.000Z"), true);
+test("tres corridas persistidas suman tres controles y conservan un incidente", () => {
+  const failedResults = baseStatus.components.map(({ id }) => ({
+    id,
+    ok: id !== "meeting_api",
+  }));
+  let status = { ...baseStatus, history: { startedAt: "2026-07-29", days: [] } };
+  let incidents = { incidents: [] };
 
-  const changed = {
-    ...same,
-    overall: "partial_outage",
-    components: same.components.map((component, index) => ({
-      ...component,
-      status: index === 0 ? "major_outage" : component.status,
-    })),
-  };
-  assert.equal(shouldPersistStatus(baseStatus, changed, "2026-07-29T21:00:00.000Z"), true);
+  for (const checkedAt of [
+    "2026-07-29T20:15:00.000Z",
+    "2026-07-29T20:30:00.000Z",
+    "2026-07-29T20:45:00.000Z",
+  ]) {
+    ({ nextStatus: status, nextIncidents: incidents } = applyMeasurement(
+      status,
+      incidents,
+      failedResults,
+      checkedAt,
+    ));
+  }
+
+  assert.equal(status.history.days[0].checks, 3);
+  assert.equal(status.history.days[0].failedChecks, 3);
+  assert.equal(status.history.days[0].failed.meeting_api, 3);
+  assert.equal(incidents.incidents.length, 1);
+  assert.equal(incidents.incidents[0].startedAt, "2026-07-29T20:15:00.000Z");
+  assert.equal(incidents.incidents[0].resolvedAt, null);
+
+  const healthyResults = baseStatus.components.map(({ id }) => ({ id, ok: true }));
+  ({ nextStatus: status, nextIncidents: incidents } = applyMeasurement(
+    status,
+    incidents,
+    healthyResults,
+    "2026-07-29T21:00:00.000Z",
+  ));
+
+  assert.equal(status.history.days[0].checks, 4);
+  assert.equal(status.overall, "operational");
+  assert.equal(incidents.incidents.length, 1);
+  assert.equal(incidents.incidents[0].resolvedAt, "2026-07-29T21:00:00.000Z");
 });
 
 test("rechaza respuestas mayores al límite sin leerlas completas", async () => {
