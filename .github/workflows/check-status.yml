@@ -49,7 +49,7 @@ jobs:
         run: |
           result="$(node scripts/check-status.mjs)"
           echo "${result}"
-          echo "persist=$(jq -r '.persistRecommended // false' <<<"${result}")" >> "${GITHUB_OUTPUT}"
+          echo "persist=$(jq -r '.persistRequired // false' <<<"${result}")" >> "${GITHUB_OUTPUT}"
 
       - name: Preparar sitio actualizado
         shell: bash
@@ -113,7 +113,7 @@ jobs:
           unexpected="$(git status --porcelain --untracked-files=all | awk '$2 != "data/incidents.json" && $2 != "data/status.json" { print $2 }')"
           test -z "${unexpected}"
           if git diff --quiet -- data/status.json data/incidents.json; then
-            echo 'El monitor recomendó persistir, pero los JSON no cambiaron.' >&2
+            echo 'La medición debía persistirse, pero los JSON no cambiaron.' >&2
             exit 1
           fi
 

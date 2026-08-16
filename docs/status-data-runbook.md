@@ -14,9 +14,10 @@ La rama `status-data` conserva exclusivamente:
 
 El workflow siempre se ejecuta desde el código protegido de `main`. Sólo lee
 esos dos archivos desde `status-data`, produce el sitio y despliega el artefacto
-de Pages. Un job independiente persiste los JSON cuando cambia el estado o
-vence el heartbeat de seis horas. Nunca se carga ni ejecuta código desde la
-rama de datos.
+de Pages. Un job independiente persiste ambos JSON después de cada medición
+válida, incluso si el estado general no cambia: el historial no puede perder
+controles entre corridas. Nunca se carga ni ejecuta código desde la rama de
+datos.
 
 ## Evidencia previa y respaldo
 
@@ -43,9 +44,11 @@ force-push y borrado, sin conceder bypass sobre `main`.
    `monitor-state`.
 2. Confirmar que `deploy` termina aunque `persist` se ejecute en paralelo.
 3. Revisar que el commit de `status-data` modifica exactamente los dos JSON.
-4. Ejecutar una segunda medición y comprobar que continúa el mismo incidente,
-   sin crear uno duplicado.
-5. Validar `https://estado.sinergius.coop.ar/data/status.json`, los assets y los
+4. Ejecutar dos mediciones consecutivas y comprobar que cada una incrementa el
+   contador, mientras continúa el mismo incidente sin crear uno duplicado.
+5. Confirmar con una recuperación controlada que el incidente se resuelve sin
+   crear otro y el contador vuelve a incrementarse.
+6. Validar `https://estado.sinergius.coop.ar/data/status.json`, los assets y los
    encabezados de seguridad. Cloudflare debe mantener el JSON como dinámico.
 
 No se envían correos durante estas pruebas. El endpoint de reuniones es un

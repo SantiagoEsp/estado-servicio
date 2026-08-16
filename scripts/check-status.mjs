@@ -5,7 +5,6 @@ const STATUS_PATH = new URL("../data/status.json", import.meta.url);
 const INCIDENTS_PATH = new URL("../data/incidents.json", import.meta.url);
 const MAX_HISTORY_DAYS = 90;
 const MAX_RESPONSE_BYTES = 256 * 1024;
-const HEARTBEAT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const USER_AGENT = "EstadoServicio/1.0 (+https://estado.sinergius.coop.ar)";
 
 export const TARGETS = [
@@ -254,21 +253,6 @@ export function updateDailyHistory(currentHistory, nextStatus, checkedAt) {
   };
 }
 
-export function shouldPersistStatus(currentStatus, nextStatus, checkedAt) {
-  const previousComponents = Object.fromEntries(
-    currentStatus.components.map(({ id, status }) => [id, status]),
-  );
-  const nextComponents = Object.fromEntries(
-    nextStatus.components.map(({ id, status }) => [id, status]),
-  );
-  const stateChanged = currentStatus.overall !== nextStatus.overall
-    || JSON.stringify(previousComponents) !== JSON.stringify(nextComponents);
-  const lastPersistedAt = Date.parse(currentStatus.checkedAt ?? "");
-  const heartbeatDue = !Number.isFinite(lastPersistedAt)
-    || Date.parse(checkedAt) - lastPersistedAt >= HEARTBEAT_INTERVAL_MS;
-  return stateChanged || heartbeatDue;
-}
-
 function incidentTitle(status) {
   return status === "major_outage"
     ? "Interrupción del servicio"
@@ -318,6 +302,29 @@ export function updateIncidentsDocument(
   };
 }
 
+/**
+ * Aplica una medición completa sobre los dos documentos persistidos. La salida
+ * de una corrida debe ser la entrada de la siguiente: así cada control suma al
+ * historial y un incidente abierto se conserva hasta una recuperación real.
+ */
+export function applyMeasurement(
+  currentStatus,
+  currentIncidents,
+  results,
+  checkedAt,
+) {
+  const nextStatus = updateStatusDocument(currentStatus, results, checkedAt, true);
+  const nextIncidents = updateIncidentsDocument(
+    currentIncidents,
+    currentStatus.overall,
+    nextStatus.overall,
+    checkedAt,
+    currentStatus.checkedAt ?? null,
+  );
+
+  return { nextStatus, nextIncidents };
+}
+
 async function main() {
   const [statusRaw, incidentsRaw] = await Promise.all([
     readFile(STATUS_PATH, "utf8"),
@@ -342,17 +349,11 @@ async function main() {
     return;
   }
 
-  const candidateStatus = updateStatusDocument(currentStatus, results, checkedAt, false);
-  const persistRecommended = shouldPersistStatus(currentStatus, candidateStatus, checkedAt);
-  const nextStatus = persistRecommended
-    ? updateStatusDocument(currentStatus, results, checkedAt, true)
-    : candidateStatus;
-  const nextIncidents = updateIncidentsDocument(
+  const { nextStatus, nextIncidents } = applyMeasurement(
+    currentStatus,
     currentIncidents,
-    currentStatus.overall,
-    nextStatus.overall,
+    results,
     checkedAt,
-    currentStatus.checkedAt ?? null,
   );
 
   await Promise.all([
@@ -365,7 +366,7 @@ async function main() {
       overall: nextStatus.overall,
       checkedAt,
       persisted: true,
-      persistRecommended,
+      persistRequired: true,
       results,
     })}\n`,
   );
