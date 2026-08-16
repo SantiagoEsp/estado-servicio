@@ -1,0 +1,91 @@
+{
+  "overall": "operational",
+  "checkedAt": "2026-08-15T05:45:30.534Z",
+  "message": "No detectamos problemas en los servicios controlados.",
+  "components": [
+    {
+      "id": "status_page",
+      "name": "Página de estado",
+      "description": "Disponibilidad del panel público de estado.",
+      "status": "operational"
+    },
+    {
+      "id": "public_site",
+      "name": "Sitio institucional",
+      "description": "Portada pública y acceso general a Sinergius.",
+      "status": "operational"
+    },
+    {
+      "id": "meeting_api",
+      "name": "Solicitudes de reunión",
+      "description": "Disponibilidad técnica del canal de contacto, sin enviar formularios.",
+      "status": "operational"
+    },
+    {
+      "id": "alternate_domain",
+      "name": "Dominio alternativo",
+      "description": "Redirección segura desde sinergius.com.ar al sitio principal.",
+      "status": "operational"
+    }
+  ],
+  "history": {
+    "startedAt": "2026-08-11",
+    "days": [
+      {
+        "date": "2026-08-11",
+        "checks": 49,
+        "failed": {
+          "public_site": 10,
+          "meeting_api": 10,
+          "alternate_domain": 10
+        },
+        "failedChecks": 10,
+        "overall": "partial_outage"
+      },
+      {
+        "date": "2026-08-12",
+        "checks": 117,
+        "failed": {
+          "public_site": 6,
+          "meeting_api": 6,
+          "alternate_domain": 6
+        },
+        "failedChecks": 6,
+        "overall": "degraded"
+      },
+      {
+        "date": "2026-08-13",
+        "checks": 116,
+        "failed": {
+          "public_site": 36,
+          "meeting_api": 36,
+          "alternate_domain": 39
+        },
+        "failedChecks": 39,
+        "overall": "partial_outage"
+      },
+      {
+        "date": "2026-08-14",
+        "checks": 120,
+        "failed": {
+          "public_site": 0,
+          "meeting_api": 0,
+          "alternate_domain": 6
+        },
+        "failedChecks": 6,
+        "overall": "degraded"
+      },
+      {
+        "date": "2026-08-15",
+        "checks": 31,
+        "failed": {
+          "public_site": 0,
+          "meeting_api": 0,
+          "alternate_domain": 0
+        },
+        "failedChecks": 0,
+        "overall": "operational"
+      }
+    ]
+  }
+}
