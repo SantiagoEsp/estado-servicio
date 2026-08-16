@@ -1,7 +1,7 @@
 {
-  "overall": "partial_outage",
-  "checkedAt": "2026-08-16T18:45:32.351Z",
-  "message": "Detectamos problemas en una parte del servicio.",
+  "overall": "operational",
+  "checkedAt": "2026-08-16T19:01:00.709Z",
+  "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
       "id": "status_page",
@@ -19,7 +19,7 @@
       "id": "meeting_api",
       "name": "Solicitudes de reunión",
       "description": "Disponibilidad técnica del canal de contacto, sin enviar formularios.",
-      "status": "major_outage"
+      "status": "operational"
     },
     {
       "id": "alternate_domain",
@@ -88,7 +88,7 @@
       },
       {
         "date": "2026-08-16",
-        "checks": 81,
+        "checks": 82,
         "failed": {
           "status_page": 0,
           "public_site": 0,
