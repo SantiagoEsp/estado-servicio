@@ -43,6 +43,7 @@ test("sirve sólo los dos JSON públicos desde la rama de datos", async () => {
   assert.equal(calls.length, 1);
   assert.match(calls[0][0], /^https:\/\/raw\.githubusercontent\.com\/Sinergius-coop-ar\/estado-servicio\/status-data\/data\/status\.json\?v=\d+$/);
   assert.deepEqual(calls[0][1].headers, { Accept: "application/json" });
+  assert.equal(Object.hasOwn(calls[0][1], "cache"), false);
   assert.equal(calls[0][1].credentials, "omit");
   assert.equal(calls[0][1].redirect, "error");
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
