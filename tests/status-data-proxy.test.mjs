@@ -45,7 +45,7 @@ test("sirve sólo los dos JSON públicos desde la rama de datos", async () => {
   assert.deepEqual(calls[0][1].headers, { Accept: "application/json" });
   assert.equal(Object.hasOwn(calls[0][1], "cache"), false);
   assert.equal(Object.hasOwn(calls[0][1], "credentials"), false);
-  assert.equal(calls[0][1].redirect, "error");
+  assert.equal(Object.hasOwn(calls[0][1], "redirect"), false);
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
 
   const missing = await handle(new Request("https://estado.sinergius.coop.ar/CNAME"));
@@ -119,6 +119,23 @@ test("valida incidentes y oculta fallos del origen", async () => {
   assert.deepEqual(warnings, [[
     "status_data_proxy_failure",
     { file: "incidents.json", reason: "upstream_status" },
+  ]]);
+});
+
+test("rechaza una respuesta que fue redirigida", async () => {
+  const warnings = [];
+  const response = upstream(validStatus);
+  Object.defineProperty(response, "redirected", { value: true });
+  const handle = createStatusDataProxy({
+    now: () => NOW,
+    logger: { warn: (...args) => warnings.push(args) },
+    fetchImpl: async () => response,
+  });
+
+  assert.equal((await handle(new Request("https://estado.sinergius.coop.ar/data/status.json"))).status, 503);
+  assert.deepEqual(warnings, [[
+    "status_data_proxy_failure",
+    { file: "status.json", reason: "upstream_redirect" },
   ]]);
 });
 
