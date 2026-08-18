@@ -106,13 +106,38 @@ test("valida incidentes y oculta fallos del origen", async () => {
   const good = createStatusDataProxy({ now: () => NOW, fetchImpl: async () => upstream(validIncidents) });
   assert.equal((await good(new Request("https://estado.sinergius.coop.ar/data/incidents.json"))).status, 200);
 
+  const warnings = [];
   const redirect = createStatusDataProxy({
     now: () => NOW,
+    logger: { warn: (...args) => warnings.push(args) },
     fetchImpl: async () => new Response(null, { status: 302, headers: { Location: "https://example.test" } }),
   });
   const failed = await redirect(new Request("https://estado.sinergius.coop.ar/data/incidents.json"));
   assert.equal(failed.status, 503);
   assert.deepEqual(await failed.json(), { error: "status_unavailable" });
+  assert.deepEqual(warnings, [[
+    "status_data_proxy_failure",
+    { file: "incidents.json", reason: "upstream_status" },
+  ]]);
+});
+
+test("la telemetría no expone mensajes de errores inesperados", async () => {
+  const warnings = [];
+  const handle = createStatusDataProxy({
+    now: () => NOW,
+    logger: { warn: (...args) => warnings.push(args) },
+    fetchImpl: async () => {
+      throw new Error("token-super-secreto");
+    },
+  });
+
+  const failed = await handle(new Request("https://estado.sinergius.coop.ar/data/status.json"));
+  assert.equal(failed.status, 503);
+  assert.deepEqual(warnings, [[
+    "status_data_proxy_failure",
+    { file: "status.json", reason: "unknown" },
+  ]]);
+  assert.equal(JSON.stringify(warnings).includes("token-super-secreto"), false);
 });
 
 test("el workflow persiste los JSON pero no intenta redesplegar el mismo SHA", async () => {
