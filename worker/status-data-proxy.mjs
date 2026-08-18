@@ -164,7 +164,21 @@ function jsonResponse(body, status, method) {
   return new Response(method === "HEAD" ? null : body, { status, headers });
 }
 
-export function createStatusDataProxy({ fetchImpl = fetch, now = Date.now } = {}) {
+function classifyFailure(error) {
+  if (error?.name === "AbortError") {
+    return "timeout";
+  }
+
+  const knownReasons = new Set([
+    "body_too_large",
+    "empty_body",
+    "invalid_document",
+    "upstream_status",
+  ]);
+  return knownReasons.has(error?.message) ? error.message : "unknown";
+}
+
+export function createStatusDataProxy({ fetchImpl = fetch, now = Date.now, logger = console } = {}) {
   return async function handle(request) {
     const method = request.method.toUpperCase();
     if (method !== "GET" && method !== "HEAD") {
@@ -207,7 +221,11 @@ export function createStatusDataProxy({ fetchImpl = fetch, now = Date.now } = {}
       }
 
       return jsonResponse(`${JSON.stringify(document, null, 2)}\n`, 200, method);
-    } catch {
+    } catch (error) {
+      logger.warn?.("status_data_proxy_failure", {
+        file: filename,
+        reason: classifyFailure(error),
+      });
       return jsonResponse(JSON.stringify({ error: "status_unavailable" }), 503, method);
     } finally {
       clearTimeout(timeout);
