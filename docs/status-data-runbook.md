@@ -12,12 +12,16 @@ La rama `status-data` conserva exclusivamente:
 - `data/status.json`;
 - `data/incidents.json`.
 
-El workflow siempre se ejecuta desde el código protegido de `main`. Sólo lee
-esos dos archivos desde `status-data`, produce el sitio y despliega el artefacto
-de Pages. Un job independiente persiste ambos JSON después de cada medición
-válida, incluso si el estado general no cambia: el historial no puede perder
-controles entre corridas. Nunca se carga ni ejecuta código desde la rama de
-datos.
+El workflow siempre se ejecuta desde el código protegido de `main`. Sólo lee y
+persiste esos dos archivos desde `status-data`, incluso si el estado general no
+cambia: el historial no puede perder controles entre corridas. Nunca se carga
+ni ejecuta código desde la rama de datos.
+
+La web estática permanece en GitHub Pages. La ruta Cloudflare
+`estado.sinergius.coop.ar/data/*` está limitada a esos dos nombres y obtiene su
+contenido de `status-data`. El Worker rechaza redirecciones, cuerpos grandes,
+JSON con esquema inesperado y estados con más de dos horas; ante cualquier
+error responde 503 sin publicar diagnósticos internos.
 
 ## Evidencia previa y respaldo
 
@@ -40,16 +44,16 @@ force-push y borrado, sin conceder bypass sobre `main`.
 
 ## Validación de una publicación
 
-1. Confirmar que `check` mide los cuatro destinos y sube `github-pages` y
-   `monitor-state`.
-2. Confirmar que `deploy` termina aunque `persist` se ejecute en paralelo.
+1. Confirmar que `check` mide los cuatro destinos y sube `monitor-state`.
+2. Confirmar que `persist` parte de la corrida actual y no de otro artefacto.
 3. Revisar que el commit de `status-data` modifica exactamente los dos JSON.
 4. Ejecutar dos mediciones consecutivas y comprobar que cada una incrementa el
    contador, mientras continúa el mismo incidente sin crear uno duplicado.
 5. Confirmar con una recuperación controlada que el incidente se resuelve sin
    crear otro y el contador vuelve a incrementarse.
 6. Validar `https://estado.sinergius.coop.ar/data/status.json`, los assets y los
-   encabezados de seguridad. Cloudflare debe mantener el JSON como dinámico.
+   encabezados de seguridad. `checkedAt` debe coincidir con `status-data` y una
+   ruta fuera de los dos JSON debe seguir llegando a Pages o responder 404.
 
 No se envían correos durante estas pruebas. El endpoint de reuniones es un
 healthcheck autenticado y no destructivo.
@@ -61,7 +65,8 @@ Si la rama de datos no puede leerse o persistirse:
 1. deshabilitar temporalmente el schedule/disparador del workflow defectuoso;
 2. revertir el commit de `main` que introdujo `status-data` mediante PR y sus
    controles obligatorios;
-3. volver a desplegar Pages desde el último commit sano de `main`;
+3. quitar la ruta del Worker para volver temporalmente al último JSON estático
+   de Pages;
 4. conservar `status-data` para análisis; no borrarla ni forzar su historial;
 5. si el problema fuese el proxy y no el workflow, usar el respaldo Cloudflare
    indicado arriba y validar nuevamente HTTPS, assets y JSON.

@@ -1,0 +1,8 @@
+name = "sinergius-status-data"
+main = "worker/status-data-proxy.mjs"
+compatibility_date = "2026-08-17"
+workers_dev = false
+
+[[routes]]
+pattern = "estado.sinergius.coop.ar/data/*"
+zone_name = "sinergius.coop.ar"

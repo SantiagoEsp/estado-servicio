@@ -38,6 +38,26 @@ test("controla únicamente superficies públicas de Sinergius", () => {
   assert.ok(
     TARGETS.every((target) => new URL(target.url).hostname !== "app.sanezeit.com"),
   );
+  assert.deepEqual(TARGETS[0].additionalChecks, [{
+    url: "https://estado.sinergius.coop.ar/data/status.json",
+    acceptedStatuses: [200],
+    expectedText: '"checkedAt"',
+  }]);
+});
+
+test("la página de estado requiere que carguen la web y los datos frescos", async () => {
+  let calls = 0;
+  const result = await checkTarget(TARGETS[0], async (url) => {
+    calls += 1;
+    return new Response(
+      url.endsWith("status.json") ? '{"checkedAt":"2026-08-18T01:00:00.000Z"}' : "Estado de los servicios",
+      { status: url.endsWith("status.json") ? 503 : 200 },
+    );
+  }, async () => {});
+
+  assert.equal(result.ok, false);
+  assert.equal(result.httpStatus, 503);
+  assert.equal(calls, 6);
 });
 
 test("el control SMTP requiere un token fuera del repositorio", () => {
@@ -158,7 +178,7 @@ test("conserva un único incidente durante controles fallidos consecutivos", () 
   assert.equal(continued.incidents[0].resolvedAt, null);
 });
 
-test("el workflow separa despliegue y persistencia sin abrir main", async () => {
+test("el workflow persiste el estado sin abrir main ni repetir un despliegue Pages", async () => {
   const workflow = await readFile(
     new URL("../.github/workflows/check-status.yml", import.meta.url),
     "utf8",
@@ -173,9 +193,7 @@ test("el workflow separa despliegue y persistencia sin abrir main", async () => 
   assert.equal(workflow.match(/git push/g)?.length, 1);
   assert.doesNotMatch(workflow, /git push(?:\s+origin)?(?:\s+HEAD)?:?main/);
 
-  const deployBlock = workflow.slice(workflow.indexOf("  deploy:"));
-  assert.match(deployBlock, /needs: check/);
-  assert.doesNotMatch(deployBlock, /needs:\s*(?:\[[^\]]*persist|persist)/);
+  assert.doesNotMatch(workflow, /upload-pages-artifact|deploy-pages|github-pages/);
   assert.match(workflow, /test "\$\(find "\$\{RUNNER_TEMP\}\/monitor-state" -type f \| wc -l\)" -eq 2/);
   assert.match(workflow, /\$2 != "data\/incidents\.json" && \$2 != "data\/status\.json"/);
   assert.match(workflow, /git diff --quiet -- data\/status\.json data\/incidents\.json/);
