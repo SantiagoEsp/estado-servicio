@@ -51,18 +51,6 @@ jobs:
           echo "${result}"
           echo "persist=$(jq -r '.persistRequired // false' <<<"${result}")" >> "${GITHUB_OUTPUT}"
 
-      - name: Preparar sitio actualizado
-        shell: bash
-        run: |
-          mkdir -p _site
-          cp index.html robots.txt .nojekyll CNAME _site/
-          cp -R assets data _site/
-
-      - name: Subir sitio actualizado
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
-        with:
-          path: _site
-
       - name: Preparar estado persistible
         shell: bash
         run: |
@@ -122,22 +110,3 @@ jobs:
           git add -- data/status.json data/incidents.json
           git commit -m "Actualizar estado del servicio"
           git push origin HEAD:status-data
-
-  deploy:
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 4
-    needs: check
-    steps:
-      - name: Publicar estado en GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5

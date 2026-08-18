@@ -10,7 +10,7 @@ El workflow `Verificar servicios` consulta la web institucional, el endpoint
 no destructivo del formulario de reuniones y el dominio alternativo. Reintenta
 antes de declarar una falla, actualiza los componentes
 afectados y abre o resuelve automáticamente el incidente público. Cada control
-publica la hora confirmada y despliega el JSON actualizado en GitHub Pages.
+publica la hora confirmada en la rama aislada `status-data`.
 La página vuelve a consultar el estado publicado cada minuto y también cuando
 el usuario regresa a una pestaña que había quedado abierta.
 
@@ -108,18 +108,18 @@ internos.
 
 ## Publicación
 
-`Publicar página de estado` valida y despliega el sitio mediante GitHub Pages en
-`estado.sinergius.coop.ar`. El workflow programado publica una lectura fresca
-en cada ejecución y conserva los dos JSON después de cada medición válida. Las
-corridas se serializan para que cada una parta del historial anterior y no se
-pierdan controles ni transiciones de incidentes.
+`Publicar página de estado` valida y despliega el sitio estático mediante GitHub
+Pages en `estado.sinergius.coop.ar`. El workflow programado conserva los dos
+JSON después de cada medición válida. Cloudflare sirve exclusivamente
+`/data/status.json` y `/data/incidents.json` desde `status-data` mediante el
+Worker versionado en `worker/status-data-proxy.mjs`; valida esquema, tamaño y
+vigencia y responde 503, nunca un verde viejo, si el origen falla.
 
 El código y los workflows permanecen en `main`, con sus controles obligatorios.
 Los dos JSON mutables se conservan en la rama `status-data`, que no es fuente de
-código ni de GitHub Pages. El despliegue depende de la medición, no del commit de
-persistencia: si GitHub rechazara temporalmente ese commit, la lectura fresca se
-publica igual y la corrida queda roja para que el fallo de continuidad sea
-visible. El procedimiento de operación y rollback está en
+código ni de GitHub Pages. GitHub Pages sólo se vuelve a desplegar cuando cambia
+el código estático de `main`; los datos se leen por la ruta aislada del Worker.
+El procedimiento de operación y rollback está en
 [`docs/status-data-runbook.md`](./docs/status-data-runbook.md).
 
 GitHub Pages debe tener `estado.sinergius.coop.ar` como dominio personalizado y

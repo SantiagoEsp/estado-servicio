@@ -13,6 +13,13 @@ export const TARGETS = [
     url: "https://estado.sinergius.coop.ar/",
     acceptedStatuses: [200],
     expectedText: "Estado de los servicios",
+    additionalChecks: [
+      {
+        url: "https://estado.sinergius.coop.ar/data/status.json",
+        acceptedStatuses: [200],
+        expectedText: '"checkedAt"',
+      },
+    ],
   },
   {
     id: "public_site",
@@ -96,20 +103,27 @@ export async function checkTarget(target, fetchImplementation = fetch, delayImpl
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      const response = await fetchImplementation(target.url, {
-        headers: {
-          "User-Agent": USER_AGENT,
-          ...(healthToken ? { Authorization: `Bearer ${healthToken}` } : {}),
-        },
-        redirect: "follow",
-        signal: AbortSignal.timeout(20_000),
-      });
-      const body = await readBodyWithLimit(response);
-      const accepted = target.acceptedStatuses.includes(response.status);
-      const contentMatches = body.toLowerCase().includes(target.expectedText.toLowerCase());
+      const endpoints = [target, ...(target.additionalChecks ?? [])];
+      const checks = await Promise.all(endpoints.map(async (endpoint) => {
+        const response = await fetchImplementation(endpoint.url, {
+          headers: {
+            "User-Agent": USER_AGENT,
+            ...(healthToken ? { Authorization: `Bearer ${healthToken}` } : {}),
+          },
+          redirect: "follow",
+          signal: AbortSignal.timeout(20_000),
+        });
+        const body = await readBodyWithLimit(response);
+        return {
+          accepted: endpoint.acceptedStatuses.includes(response.status),
+          contentMatches: body.toLowerCase().includes(endpoint.expectedText.toLowerCase()),
+          httpStatus: response.status,
+        };
+      }));
       lastResult = {
-        ok: accepted && contentMatches,
-        httpStatus: response.status,
+        ok: checks.every(({ accepted, contentMatches }) => accepted && contentMatches),
+        httpStatus: checks.find(({ accepted, contentMatches }) => !accepted || !contentMatches)?.httpStatus
+          ?? checks[0].httpStatus,
       };
     } catch {
       lastResult = { ok: false, httpStatus: null };
