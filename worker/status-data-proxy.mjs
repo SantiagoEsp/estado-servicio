@@ -199,7 +199,6 @@ export function createStatusDataProxy({ fetchImpl = fetch, now = Date.now, logge
 
     try {
       const upstream = await fetchImpl(upstreamUrl, {
-        credentials: "omit",
         headers: { Accept: "application/json" },
         redirect: "error",
         signal: controller.signal,
