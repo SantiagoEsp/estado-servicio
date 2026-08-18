@@ -173,6 +173,7 @@ function classifyFailure(error) {
     "body_too_large",
     "empty_body",
     "invalid_document",
+    "upstream_redirect",
     "upstream_status",
   ]);
   return knownReasons.has(error?.message) ? error.message : "unknown";
@@ -200,10 +201,12 @@ export function createStatusDataProxy({ fetchImpl = fetch, now = Date.now, logge
     try {
       const upstream = await fetchImpl(upstreamUrl, {
         headers: { Accept: "application/json" },
-        redirect: "error",
         signal: controller.signal,
       });
 
+      if (upstream.redirected) {
+        throw new Error("upstream_redirect");
+      }
       if (upstream.status !== 200) {
         throw new Error("upstream_status");
       }
