@@ -1,6 +1,6 @@
 {
   "overall": "operational",
-  "checkedAt": "2026-08-22T17:00:57.878Z",
+  "checkedAt": "2026-08-22T17:15:30.525Z",
   "message": "No detectamos problemas en los servicios controlados.",
   "components": [
     {
@@ -160,7 +160,7 @@
       },
       {
         "date": "2026-08-22",
-        "checks": 98,
+        "checks": 99,
         "failed": {
           "status_page": 0,
           "public_site": 0,
